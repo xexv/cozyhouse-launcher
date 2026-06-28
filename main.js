@@ -378,6 +378,80 @@ ipcMain.handle('select-folder', async () => {
   return null;
 });
 
+// List mods/shaders/resourcepacks from the Minecraft directory
+ipcMain.handle('list-mods', async (event, { mcPath, type }) => {
+  const typeMap = {
+    mods:         { enabled: 'mods',         disabled: path.join('mods', 'disabled'),         ext: ['.jar'] },
+    shaders:      { enabled: 'shaderpacks',   disabled: path.join('shaderpacks', 'disabled'),   ext: ['.zip'] },
+    resourcepacks:{ enabled: 'resourcepacks', disabled: path.join('resourcepacks', 'disabled'), ext: ['.zip'] }
+  };
+  const { enabled, disabled, ext } = typeMap[type] || typeMap.mods;
+
+  const scanDir = (dirPath) => {
+    if (!fs.existsSync(dirPath)) return [];
+    try { return fs.readdirSync(dirPath).filter(f => ext.some(e => f.toLowerCase().endsWith(e))); }
+    catch { return []; }
+  };
+
+  const enabledFiles  = scanDir(path.join(mcPath, enabled)).map(f  => ({ filename: f, enabled: true  }));
+  const disabledFiles = scanDir(path.join(mcPath, disabled)).map(f => ({ filename: f, enabled: false }));
+  return [...enabledFiles, ...disabledFiles];
+});
+
+// Move a mod file between enabled/disabled directories
+ipcMain.handle('toggle-mod', async (event, { mcPath, type, filename, enable }) => {
+  const typeMap = {
+    mods:         { enabled: 'mods',         disabled: path.join('mods', 'disabled')         },
+    shaders:      { enabled: 'shaderpacks',   disabled: path.join('shaderpacks', 'disabled')   },
+    resourcepacks:{ enabled: 'resourcepacks', disabled: path.join('resourcepacks', 'disabled') }
+  };
+  const { enabled: enabledDir, disabled: disabledDir } = typeMap[type] || typeMap.mods;
+  const srcDir  = path.join(mcPath, enable ? disabledDir : enabledDir);
+  const destDir = path.join(mcPath, enable ? enabledDir  : disabledDir);
+  const src  = path.join(srcDir,  filename);
+  const dest = path.join(destDir, filename);
+  fs.mkdirSync(destDir, { recursive: true });
+  if (fs.existsSync(src)) { fs.renameSync(src, dest); return { success: true }; }
+  return { success: false, error: 'File not found' };
+});
+
+// Download missing required mods from server manifest
+ipcMain.handle('sync-modpack', async (event, { mcPath, manifestUrl }) => {
+  const modsPath = path.join(mcPath, 'mods');
+  fs.mkdirSync(modsPath, { recursive: true });
+
+  let manifest;
+  try {
+    const res = await fetch(manifestUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    manifest = await res.json();
+  } catch (err) {
+    throw new Error(`Не удалось загрузить манифест: ${err.message}`);
+  }
+
+  const mods = manifest.mods || [];
+  const results = [];
+  for (let i = 0; i < mods.length; i++) {
+    const mod = mods[i];
+    const dest = path.join(modsPath, mod.filename);
+    const send = (status, percent) => {
+      if (win) win.webContents.send('sync-progress', { i, total: mods.length, filename: mod.name || mod.filename, status, percent: percent || 0 });
+    };
+
+    send('checking');
+    if (fs.existsSync(dest)) { results.push({ filename: mod.filename, status: 'exists' }); continue; }
+
+    try {
+      send('downloading', 0);
+      await downloadFile(mod.url, dest, (pct) => send('downloading', pct));
+      results.push({ filename: mod.filename, status: 'downloaded' });
+    } catch (err) {
+      results.push({ filename: mod.filename, status: 'error', error: err.message });
+    }
+  }
+  return results;
+});
+
 // Handle file selection picker
 ipcMain.handle('select-file', async (event, filters) => {
   if (!win) return null;

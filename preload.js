@@ -28,5 +28,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   installUpdate: () => ipcRenderer.send('install-update'),
 
   // Server status
-  getServerStatus: (host) => ipcRenderer.invoke('get-server-status', host)
+  getServerStatus: (host) => ipcRenderer.invoke('get-server-status', host),
+
+  // Mod management
+  listMods:       (mcPath, type)                     => ipcRenderer.invoke('list-mods',   { mcPath, type }),
+  toggleMod:      (mcPath, type, filename, enable)   => ipcRenderer.invoke('toggle-mod',  { mcPath, type, filename, enable }),
+  syncModpack:    (mcPath, manifestUrl)              => ipcRenderer.invoke('sync-modpack',{ mcPath, manifestUrl }),
+  onSyncProgress: (callback) => ipcRenderer.on('sync-progress', (_e, data) => callback(data))
 });

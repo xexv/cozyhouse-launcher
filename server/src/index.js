@@ -199,7 +199,44 @@ export default {
         return jsonResponse(news);
       }
 
-      // Route 7: Player lookup — proxies Mojang API (avoids browser CORS)
+      // Route 7: Current user profile (requires Bearer token)
+      if (url.pathname === "/api/me" && request.method === "GET") {
+        const auth = request.headers.get("Authorization") || "";
+        const accessToken = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+        if (!accessToken) return errorResponse("Токен обязателен.", 401);
+
+        const session = await env.DB.prepare(
+          "SELECT user_id FROM sessions WHERE access_token = ? AND expires_at > ?"
+        ).bind(accessToken, Date.now()).first();
+        if (!session) return errorResponse("Сессия недействительна.", 401);
+
+        const user = await env.DB.prepare(
+          "SELECT username, uuid, balance_coins, skin_url, role, created_at FROM users WHERE id = ?"
+        ).bind(session.user_id).first();
+        if (!user) return errorResponse("Пользователь не найден.", 404);
+
+        return jsonResponse({
+          nickname:      user.username,
+          uuid:          user.uuid,
+          balance_coins: user.balance_coins ?? 0,
+          skin_url:      user.skin_url ?? null,
+          rank:          user.role ?? "user",
+          created_at:    user.created_at,
+        });
+      }
+
+      // Route 8: Modpack manifest — list required server mods
+      if (url.pathname === "/api/modpack" && request.method === "GET") {
+        return jsonResponse({
+          version:   "1.0.0",
+          mcVersion: "1.21.1",
+          mods: [
+            // Add entries as { name, filename, url } when server mods are finalized
+          ]
+        });
+      }
+
+      // Route 10: Player lookup — proxies Mojang API (avoids browser CORS)
       if (url.pathname.startsWith("/api/player/") && request.method === "GET") {
         const username = decodeURIComponent(url.pathname.slice("/api/player/".length)).trim();
         if (!username) return errorResponse("Никнейм обязателен.", 400);
