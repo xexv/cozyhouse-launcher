@@ -1953,44 +1953,66 @@
       showNotification(`Скин изменён на ${label}!`);
     });
 
-    // Handle skin loading by nickname search
-    searchSkinBtn.addEventListener('click', () => {
+    // Lookup Minecraft player via Worker → Mojang API
+    const lookupMinecraftPlayer = async (username) => {
+      const res = await fetch(`${AUTH_API}/api/player/${encodeURIComponent(username)}`);
+      if (!res.ok) throw new Error('Ошибка сервера.');
+      return await res.json(); // { exists, id?, name? }
+    };
+
+    const doSkinSearch = async () => {
       const nick = skinSearchInput.value.trim();
-      if (nick.length < 3) {
-        showNotification('Введите корректный никнейм!');
-        return;
-      }
+      if (nick.length < 3) { showNotification('Введите корректный никнейм!'); return; }
 
-      // Check if already in list
-      const existing = savedSkinsGrid.querySelector(`[data-skin-id="${nick}"]`);
-      if (existing) {
-        existing.click();
+      // Check if already in list (case-insensitive)
+      const existingCard = [...savedSkinsGrid.querySelectorAll('.saved-skin-card[data-skin-id]')]
+        .find(c => c.getAttribute('data-skin-id').toLowerCase() === nick.toLowerCase());
+      if (existingCard) { existingCard.click(); skinSearchInput.value = ''; return; }
+
+      // Loading state
+      searchSkinBtn.disabled = true;
+      const origText = searchSkinBtn.textContent;
+      searchSkinBtn.textContent = '...';
+
+      try {
+        const player = await lookupMinecraftPlayer(nick);
+
+        if (!player.exists) {
+          showNotification(`Игрок "${nick}" не существует.`);
+          skinSearchInput.select();
+          return;
+        }
+
+        const exactName = player.name;
+
+        const newCard = document.createElement('div');
+        newCard.setAttribute('data-skin-id', exactName);
+        newCard.className = 'saved-skin-card shrink-0 w-[72px] h-[112px] border border-[#d4a373]/20 hover:border-[#d4a373]/45 bg-[#251d18]/60 rounded-[16px] p-1.5 flex flex-col items-center justify-center cursor-pointer transition-all select-none relative group overflow-hidden';
+        newCard.innerHTML = `
+          <button class="skin-delete-btn absolute top-1 right-1 w-4 h-4 bg-[#e63946]/90 hover:bg-[#e63946] rounded-full items-center justify-center hidden group-hover:flex z-20">
+            <svg class="w-2 h-2 text-white pointer-events-none" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+          <img class="h-[90px] object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,0.5)] transform group-hover:scale-105 transition-transform pointer-events-none"
+               src="https://mc-heads.net/body/${exactName}.png" alt="${exactName}"
+               onerror="this.onerror=null; this.src='https://mc-heads.net/body/Steve.png';">
+        `;
+
+        document.getElementById('add-skin-card-btn').after(newCard);
+        newCard.click();
         skinSearchInput.value = '';
-        return;
+
+      } catch (err) {
+        showNotification(err.message || 'Ошибка при поиске игрока.');
+      } finally {
+        searchSkinBtn.disabled = false;
+        searchSkinBtn.textContent = origText;
       }
+    };
 
-      // Create new skin card element
-      const newCard = document.createElement('div');
-      newCard.setAttribute('data-skin-id', nick);
-      newCard.className = 'saved-skin-card shrink-0 w-[72px] h-[112px] border border-[#d4a373]/20 hover:border-[#d4a373]/45 bg-[#251d18]/60 rounded-[16px] p-1.5 flex flex-col items-center justify-center cursor-pointer transition-all select-none relative group overflow-hidden';
-      newCard.innerHTML = `
-        <button class="skin-delete-btn absolute top-1 right-1 w-4 h-4 bg-[#e63946]/90 hover:bg-[#e63946] rounded-full items-center justify-center hidden group-hover:flex z-20">
-          <svg class="w-2 h-2 text-white pointer-events-none" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-        <img class="h-[90px] object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,0.5)] transform group-hover:scale-105 transition-transform pointer-events-none"
-             src="https://mc-heads.net/body/${nick}.png" alt="${nick}"
-             onerror="this.onerror=null; this.src='https://mc-heads.net/body/Steve.png';">
-      `;
-
-      // Insert right after the add skin button
-      document.getElementById('add-skin-card-btn').after(newCard);
-
-      // Auto click new card
-      newCard.click();
-      skinSearchInput.value = '';
-    });
+    searchSkinBtn.addEventListener('click', doSkinSearch);
+    skinSearchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSkinSearch(); });
 
     // 8. Live Clock Script
     const updateClock = () => {

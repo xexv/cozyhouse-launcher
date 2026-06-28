@@ -199,6 +199,26 @@ export default {
         return jsonResponse(news);
       }
 
+      // Route 7: Player lookup — proxies Mojang API (avoids browser CORS)
+      if (url.pathname.startsWith("/api/player/") && request.method === "GET") {
+        const username = decodeURIComponent(url.pathname.slice("/api/player/".length)).trim();
+        if (!username) return errorResponse("Никнейм обязателен.", 400);
+
+        const mojangRes = await fetch(
+          `https://api.mojang.com/users/profiles/minecraft/${encodeURIComponent(username)}`
+        );
+
+        if (mojangRes.status === 404 || mojangRes.status === 204) {
+          return jsonResponse({ exists: false });
+        }
+        if (!mojangRes.ok) {
+          return errorResponse("Ошибка Mojang API", 502);
+        }
+
+        const data = await mojangRes.json();
+        return jsonResponse({ exists: true, id: data.id, name: data.name });
+      }
+
       // Catch-all 404
       return errorResponse("Эндпоинт не найден.", 404);
 
