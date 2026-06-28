@@ -19,7 +19,7 @@ export default {
     try {
       // Route 1: Register User
       if (url.pathname === "/api/register" && request.method === "POST") {
-        const { username, password } = await request.json();
+        const { username, password, email } = await request.json();
         if (!username || !password) {
           return errorResponse("Никнейм и пароль обязательны.", 400);
         }
@@ -28,6 +28,11 @@ export default {
         const usernameRegex = /^[a-zA-Z0-9_]{3,16}$/;
         if (!usernameRegex.test(username)) {
           return errorResponse("Неверный формат никнейма (3-16 символов, только латиница, цифры и _).", 400);
+        }
+
+        // Validate email if provided
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          return errorResponse("Неверный формат email.", 400);
         }
 
         // Check if user already exists
@@ -39,27 +44,101 @@ export default {
           return errorResponse("Пользователь с таким никнеймом уже зарегистрирован.", 409);
         }
 
+        // Check email uniqueness if provided
+        if (email) {
+          const existingEmail = await env.DB.prepare(
+            "SELECT id FROM users WHERE email = ?"
+          ).bind(email.toLowerCase()).first();
+          if (existingEmail) {
+            return errorResponse("Этот email уже привязан к другому аккаунту.", 409);
+          }
+        }
+
         // Hash password using PBKDF2
         const salt = crypto.getRandomValues(new Uint8Array(16));
         const hash = await hashPassword(password, salt);
         const passwordHashString = `${toHex(salt)}:${toHex(hash)}`;
 
         // Generate custom UUID for Minecraft
-        const uuid = crypto.randomUUID().replace(/-/g, ""); // strip hyphens
+        const uuid = crypto.randomUUID().replace(/-/g, "");
 
         const id = crypto.randomUUID();
         const now = Date.now();
 
+        // Generate verification code if email provided
+        let verificationCode = null;
+        let verificationExpires = null;
+        if (email) {
+          const bytes = crypto.getRandomValues(new Uint8Array(3));
+          verificationCode = (parseInt(toHex(bytes), 16) % 900000 + 100000).toString();
+          verificationExpires = now + 10 * 60 * 1000; // 10 minutes
+        }
+
         // Insert into D1 DB
         await env.DB.prepare(
-          "INSERT INTO users (id, username, password_hash, uuid, balance_coins, created_at) VALUES (?, ?, ?, ?, 0, ?)"
-        ).bind(id, username, passwordHashString, uuid, now).run();
+          "INSERT INTO users (id, username, password_hash, uuid, balance_coins, created_at, email, email_verified, verification_code, verification_expires) VALUES (?, ?, ?, ?, 0, ?, ?, 0, ?, ?)"
+        ).bind(id, username, passwordHashString, uuid, now, email ? email.toLowerCase() : null, verificationCode, verificationExpires).run();
+
+        // Send verification email via Resend if configured
+        let emailSent = false;
+        if (email && verificationCode && env.RESEND_API_KEY) {
+          try {
+            const emailRes = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                from: "CozyHouse <noreply@cozyhouse.ru>",
+                to: [email],
+                subject: "Подтверждение регистрации — Cozy House",
+                html: `
+                  <div style="background:#1a1411;color:#faedcd;font-family:sans-serif;padding:32px;border-radius:16px;max-width:480px;margin:0 auto">
+                    <h2 style="color:#d4a373;font-size:24px;margin:0 0 12px">Добро пожаловать, ${username}!</h2>
+                    <p style="margin:0 0 20px;color:#a99c92">Ваш код подтверждения для входа в лаунчер Cozy House:</p>
+                    <div style="background:#251d18;border:1px solid #d4a373;border-radius:12px;padding:20px;text-align:center;margin:0 0 20px">
+                      <span style="font-size:36px;font-weight:900;letter-spacing:8px;color:#faedcd">${verificationCode}</span>
+                    </div>
+                    <p style="margin:0;color:#5c4e43;font-size:12px">Код действует 10 минут. Если вы не регистрировались — проигнорируйте это письмо.</p>
+                  </div>
+                `,
+              }),
+            });
+            emailSent = emailRes.ok;
+          } catch (_) {}
+        }
 
         return jsonResponse({
           success: true,
           message: "Регистрация успешна!",
+          requiresVerification: !!(email && verificationCode),
+          emailSent,
           user: { id, username, uuid }
         });
+      }
+
+      // Route 1b: Verify email code
+      if (url.pathname === "/api/verify-email" && request.method === "POST") {
+        const { username, code } = await request.json();
+        if (!username || !code) {
+          return errorResponse("Никнейм и код обязательны.", 400);
+        }
+
+        const user = await env.DB.prepare(
+          "SELECT id, verification_code, verification_expires FROM users WHERE LOWER(username) = LOWER(?)"
+        ).bind(username).first();
+
+        if (!user) return errorResponse("Пользователь не найден.", 404);
+        if (!user.verification_code) return errorResponse("Код верификации не найден или уже использован.", 400);
+        if (Date.now() > user.verification_expires) return errorResponse("Срок действия кода истёк. Зарегистрируйтесь снова.", 410);
+        if (user.verification_code !== code.trim()) return errorResponse("Неверный код. Проверьте письмо.", 400);
+
+        await env.DB.prepare(
+          "UPDATE users SET email_verified = 1, verification_code = NULL, verification_expires = NULL WHERE id = ?"
+        ).bind(user.id).run();
+
+        return jsonResponse({ success: true, message: "Email подтверждён!" });
       }
 
       // Route 2: Login User
@@ -244,7 +323,83 @@ export default {
         });
       }
 
-      // Route 9: Player lookup — proxies Mojang API (avoids browser CORS)
+      // Route 9: Change password (requires Bearer token)
+      if (url.pathname === "/api/change-password" && request.method === "POST") {
+        const auth = request.headers.get("Authorization") || "";
+        const accessToken = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+        if (!accessToken) return errorResponse("Токен обязателен.", 401);
+
+        const session = await env.DB.prepare(
+          "SELECT user_id FROM sessions WHERE access_token = ? AND expires_at > ?"
+        ).bind(accessToken, Date.now()).first();
+        if (!session) return errorResponse("Сессия недействительна.", 401);
+
+        const { oldPassword, newPassword } = await request.json();
+        if (!oldPassword || !newPassword) return errorResponse("Укажите старый и новый пароль.", 400);
+        if (newPassword.length < 4) return errorResponse("Новый пароль слишком короткий (минимум 4 символа).", 400);
+
+        const user = await env.DB.prepare(
+          "SELECT password_hash FROM users WHERE id = ?"
+        ).bind(session.user_id).first();
+        if (!user) return errorResponse("Пользователь не найден.", 404);
+
+        const [saltHex, hashHex] = user.password_hash.split(":");
+        const salt = fromHex(saltHex);
+        const expectedHash = fromHex(hashHex);
+        const derivedHash = await hashPassword(oldPassword, salt);
+        if (!compareBuffers(derivedHash, expectedHash)) {
+          return errorResponse("Неверный текущий пароль.", 401);
+        }
+
+        const newSalt = crypto.getRandomValues(new Uint8Array(16));
+        const newHash = await hashPassword(newPassword, newSalt);
+        const newHashString = `${toHex(newSalt)}:${toHex(newHash)}`;
+        await env.DB.prepare(
+          "UPDATE users SET password_hash = ? WHERE id = ?"
+        ).bind(newHashString, session.user_id).run();
+
+        return jsonResponse({ success: true, message: "Пароль успешно изменён." });
+      }
+
+      // Route 10: Shop — buy rank with coins
+      if (url.pathname === "/api/shop/buy" && request.method === "POST") {
+        const auth = request.headers.get("Authorization") || "";
+        const accessToken = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+        if (!accessToken) return errorResponse("Токен обязателен.", 401);
+
+        const session = await env.DB.prepare(
+          "SELECT user_id FROM sessions WHERE access_token = ? AND expires_at > ?"
+        ).bind(accessToken, Date.now()).first();
+        if (!session) return errorResponse("Сессия недействительна.", 401);
+
+        const { item } = await request.json();
+        const SHOP_ITEMS = { vip: 99, premium: 299 };
+        if (!item || !SHOP_ITEMS[item]) return errorResponse("Неизвестный товар.", 400);
+        const cost = SHOP_ITEMS[item];
+
+        const user = await env.DB.prepare(
+          "SELECT balance_coins FROM users WHERE id = ?"
+        ).bind(session.user_id).first();
+        if (!user) return errorResponse("Пользователь не найден.", 404);
+
+        if (user.balance_coins < cost) {
+          return errorResponse(`Недостаточно монет. Нужно ${cost} АР, у вас ${user.balance_coins} АР.`, 402);
+        }
+
+        const newBalance = user.balance_coins - cost;
+        await env.DB.prepare(
+          "UPDATE users SET balance_coins = ?, role = ? WHERE id = ?"
+        ).bind(newBalance, item, session.user_id).run();
+
+        return jsonResponse({
+          success: true,
+          message: `Привилегия ${item.toUpperCase()} активирована!`,
+          balance_coins: newBalance,
+          rank: item,
+        });
+      }
+
+      // Route 11: Player lookup — proxies Mojang API (avoids browser CORS)
       if (url.pathname.startsWith("/api/player/") && request.method === "GET") {
         const username = decodeURIComponent(url.pathname.slice("/api/player/".length)).trim();
         if (!username) return errorResponse("Никнейм обязателен.", 400);

@@ -9,7 +9,11 @@ CREATE TABLE IF NOT EXISTS users (
     skin_url TEXT DEFAULT NULL,
     balance_coins INTEGER DEFAULT 0,
     role TEXT DEFAULT 'user',
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    email TEXT DEFAULT NULL,
+    email_verified INTEGER DEFAULT 0,
+    verification_code TEXT DEFAULT NULL,
+    verification_expires INTEGER DEFAULT NULL
 );
 
 -- Sessions Table: Stores active launcher tokens for client-server handshake
