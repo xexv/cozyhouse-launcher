@@ -1,0 +1,9 @@
+name = "cozy-house-auth"
+main = "src/index.js"
+compatibility_date = "2024-03-01"
+
+# D1 Database Bindings (Run npx wrangler d1 create cozy-db to create database, then paste binding details below)
+[[d1_databases]]
+binding = "DB"
+database_name = "cozy-db"
+database_id = "24e97381-e32a-4f6c-909d-67e92ba0714c"

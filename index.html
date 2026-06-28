@@ -1,0 +1,2773 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cozy House Launcher</title>
+  
+  <!-- Tailwind CSS v4 Browser CDN -->
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  
+  <!-- Google Fonts: Unbounded (Headings) & Outfit (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <style type="text/css">
+    @import "tailwindcss";
+ 
+    @theme {
+      --font-unbounded: 'Unbounded', sans-serif;
+      --font-outfit: 'Outfit', sans-serif;
+      
+      --color-brand-beige: #d4a373;
+      --color-brand-beige-light: #faedcd;
+      --color-brand-beige-dark: #a98467;
+      
+      --animate-float: float 8s ease-in-out infinite;
+      --animate-pulse-slow: pulse-slow 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      --animate-shake: shake 0.4s ease-in-out;
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+      }
+      @keyframes pulse-slow {
+        0%, 100% { opacity: 0.15; }
+        50% { opacity: 0.35; }
+      }
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-6px); }
+        40%, 80% { transform: translateX(6px); }
+      }
+    }
+
+    /* Custom input autofill behavior */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus {
+      -webkit-text-fill-color: #ffffff;
+      -webkit-box-shadow: 0 0 0px 1000px #0d0b15 inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+    
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #25203b;
+      border-radius: 99px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3c3263;
+    }
+
+    /* Custom classes for transitions */
+    .slide-in {
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Range input customizations */
+    input[type=range]::-webkit-slider-runnable-track {
+      background: #0d0b15;
+      border: 1px solid #25203b;
+      height: 8px;
+      border-radius: 99px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      margin-top: -5px;
+    }
+
+    /* Electron Drag regions */
+    body {
+      -webkit-app-region: drag;
+    }
+    main, aside, nav, #global-item-tooltip, #toast-notif, button, input, select, a, #electron-controls, webview {
+      -webkit-app-region: no-drag;
+    }
+    .no-drag-region {
+      -webkit-app-region: no-drag;
+    }
+    
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background-color: transparent !important;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+    
+    #app-window {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #0c0908;
+      overflow: hidden;
+    }
+    
+    /* Electron rounded window corners style */
+    body.is-electron #app-window {
+      border-radius: 24px;
+      border: 1.5px solid rgba(212, 163, 115, 0.35);
+    }
+
+    /* Nether Red Theme Overrides */
+    body.theme-nether-red .text-\[\#d4a373\] { color: #e63946 !important; }
+    body.theme-nether-red .bg-\[\#d4a373\] { background-color: #e63946 !important; }
+    body.theme-nether-red .border-\[\#d4a373\]\/25 { border-color: rgba(230, 57, 70, 0.25) !important; }
+    body.theme-nether-red .border-\[\#d4a373\]\/20 { border-color: rgba(230, 57, 70, 0.20) !important; }
+    body.theme-nether-red .border-\[\#d4a373\]\/30 { border-color: rgba(230, 57, 70, 0.30) !important; }
+    body.theme-nether-red .border-\[\#d4a373\]\/40 { border-color: rgba(230, 57, 70, 0.40) !important; }
+    body.theme-nether-red .hover\:bg-\[\#c69362\]:hover { background-color: #d62839 !important; }
+    body.theme-nether-red .bg-\[\#1a1411\]\/80 { background-color: rgba(28, 17, 17, 0.8) !important; }
+    body.theme-nether-red .bg-\[\#251d18\]\/70 { background-color: rgba(45, 20, 20, 0.7) !important; }
+    body.theme-nether-red .bg-\[\#251d18\]\/50 { background-color: rgba(45, 20, 20, 0.5) !important; }
+    body.theme-nether-red .bg-\[\#8f6848\] { background-color: #9b1c1c !important; }
+    body.theme-nether-red .hover\:bg-\[\#2a201b\]\/30:hover { background-color: rgba(45, 20, 20, 0.3) !important; }
+    body.theme-nether-red svg.text-\[\#d4a373\] { color: #e63946 !important; }
+
+    /* Ender Blue Theme Overrides */
+    body.theme-ender-blue .text-\[\#d4a373\] { color: #00b4d8 !important; }
+    body.theme-ender-blue .bg-\[\#d4a373\] { background-color: #00b4d8 !important; }
+    body.theme-ender-blue .border-\[\#d4a373\]\/25 { border-color: rgba(0, 180, 216, 0.25) !important; }
+    body.theme-ender-blue .border-\[\#d4a373\]\/20 { border-color: rgba(0, 180, 216, 0.20) !important; }
+    body.theme-ender-blue .border-\[\#d4a373\]\/30 { border-color: rgba(0, 180, 216, 0.30) !important; }
+    body.theme-ender-blue .border-\[\#d4a373\]\/40 { border-color: rgba(0, 180, 216, 0.40) !important; }
+    body.theme-ender-blue .hover\:bg-\[\#c69362\]:hover { background-color: #0077b6 !important; }
+    body.theme-ender-blue .bg-\[\#1a1411\]\/80 { background-color: rgba(17, 24, 28, 0.8) !important; }
+    body.theme-ender-blue .bg-\[\#251d18\]\/70 { background-color: rgba(20, 35, 45, 0.7) !important; }
+    body.theme-ender-blue .bg-\[\#251d18\]\/50 { background-color: rgba(20, 35, 45, 0.5) !important; }
+    body.theme-ender-blue .bg-\[\#8f6848\] { background-color: #0077b6 !important; }
+    body.theme-ender-blue .hover\:bg-\[\#2a201b\]\/30:hover { background-color: rgba(20, 35, 45, 0.3) !important; }
+    body.theme-ender-blue svg.text-\[\#d4a373\] { color: #00b4d8 !important; }
+  </style>
+</head>
+<body class="text-white font-outfit select-none flex flex-col justify-center items-center overflow-hidden bg-transparent w-full h-full">
+  <div id="app-window">
+
+  <!-- Auto-Update Banner (slides down from top when update is available) -->
+  <div id="update-banner" class="fixed top-3 left-3 right-3 z-[250] -translate-y-[140%] transition-transform duration-500 ease-out pointer-events-none no-drag-region">
+    <div class="bg-[#1a1411]/95 border border-[#d4a373]/40 rounded-[18px] px-5 py-3.5 flex items-center justify-between shadow-[0_6px_30px_rgba(0,0,0,0.6)] backdrop-blur-md pointer-events-auto gap-4">
+      <!-- Icon + Text -->
+      <div class="flex items-center space-x-3 min-w-0">
+        <div id="update-banner-icon" class="w-8 h-8 rounded-full bg-[#d4a373]/15 border border-[#d4a373]/35 flex items-center justify-center text-[#d4a373] shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <span id="update-banner-title" class="font-unbounded font-black text-[11px] text-white block truncate">Доступно обновление</span>
+          <span id="update-banner-desc" class="text-[10px] text-[#a99c92] block truncate">Скачивание начнётся автоматически...</span>
+        </div>
+      </div>
+      <!-- Progress + Actions -->
+      <div class="flex items-center space-x-3 shrink-0">
+        <div id="update-banner-progress-wrap" class="hidden w-28 h-1.5 bg-[#31251e] rounded-full overflow-hidden">
+          <div id="update-banner-progress-bar" class="h-full bg-[#d4a373] rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <button id="update-banner-install-btn" class="hidden bg-[#d4a373] hover:bg-[#c69362] active:scale-[0.97] text-white text-[10px] font-bold px-4 py-2 rounded-[10px] transition-all cursor-pointer whitespace-nowrap">
+          Перезапустить
+        </button>
+        <button id="update-banner-dismiss-btn" class="w-7 h-7 flex items-center justify-center text-[#a99c92] hover:text-white hover:bg-white/10 rounded-lg transition-all cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Window Control Buttons (Visible for Electron frameless client) -->
+  <div id="electron-controls" class="fixed top-4 right-4 z-[100] flex items-center space-x-1.5 bg-[#1a1411]/65 backdrop-blur-md border border-[#d4a373]/25 rounded-xl p-1 shadow-[0_4px_16px_rgba(0,0,0,0.3)] no-drag-region hidden">
+    <!-- Minimize -->
+    <button id="win-min" class="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-[#a99c92] hover:text-white transition-all cursor-pointer">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <!-- Close -->
+    <button id="win-close" class="w-8 h-8 rounded-lg hover:bg-red-500/20 flex items-center justify-center text-[#a99c92] hover:text-red-400 transition-all cursor-pointer">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- SVG Custom Pixelated Cityscape Background -->
+  <svg class="absolute inset-0 w-full h-full object-cover z-0 opacity-40 select-none pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#120e0c" />
+        <stop offset="50%" stop-color="#1d1714" />
+        <stop offset="100%" stop-color="#0b0908" />
+      </linearGradient>
+    </defs>
+    <rect width="1920" height="1080" fill="url(#bgGrad)" />
+
+    <!-- Top Pixelated structures hanging down -->
+    <path d="M 0,0 L 0,120 L 40,120 L 40,80 L 80,80 L 80,180 L 120,180 L 120,100 L 160,100 L 160,60 L 220,60 L 220,140 L 260,140 L 260,200 L 300,200 L 300,90 L 340,90 L 340,150 L 400,150 L 400,70 L 440,70 L 440,220 L 480,220 L 480,130 L 520,130 L 520,110 L 580,110 L 580,160 L 620,160 L 620,80 L 680,80 L 680,190 L 720,190 L 720,100 L 780,100 L 780,130 L 820,130 L 820,240 L 880,240 L 880,150 L 940,150 L 940,90 L 1000,90 L 1000,180 L 1060,180 L 1060,120 L 1100,120 L 1100,70 L 1160,70 L 1160,210 L 1200,210 L 1200,140 L 1260,140 L 1260,90 L 1320,90 L 1320,170 L 1360,170 L 1360,230 L 1420,230 L 1420,120 L 1480,120 L 1480,80 L 1520,80 L 1520,150 L 1580,150 L 1580,200 L 1620,200 L 1620,110 L 1680,110 L 1680,70 L 1740,70 L 1740,180 L 1780,180 L 1780,100 L 1840,100 L 1840,140 L 1920,140 L 1920,0 Z" 
+          fill="#1c1512" opacity="0.4" />
+    
+    <path d="M 0,0 L 0,60 L 80,60 L 80,120 L 140,120 L 140,50 L 200,50 L 200,90 L 280,90 L 280,140 L 320,140 L 320,60 L 420,60 L 420,110 L 500,110 L 500,80 L 580,80 L 580,150 L 640,150 L 640,70 L 700,70 L 700,130 L 760,130 L 760,50 L 840,50 L 840,110 L 920,110 L 920,80 L 1000,80 L 1000,160 L 1080,160 L 1080,90 L 1140,90 L 1140,140 L 1220,140 L 1220,60 L 1300,60 L 1300,110 L 1380,110 L 1380,80 L 1460,80 L 1460,150 L 1520,150 L 1520,70 L 1600,70 L 1600,120 L 1680,120 L 1680,50 L 1760,50 L 1760,100 L 1840,100 L 1840,60 L 1920,60 L 1920,0 Z" 
+          fill="#130f0c" opacity="0.7" />
+
+    <!-- Bottom Pixelated Skyline -->
+    <!-- Far Layer -->
+    <path d="M 0,1080 L 0,900 L 60,900 L 60,940 L 120,940 L 120,860 L 180,860 L 180,890 L 240,890 L 240,820 L 300,820 L 300,910 L 360,910 L 360,850 L 420,850 L 420,880 L 480,880 L 480,800 L 540,800 L 540,860 L 600,860 L 600,920 L 660,920 L 660,840 L 720,840 L 720,870 L 780,870 L 780,790 L 840,790 L 840,850 L 900,850 L 900,910 L 960,910 L 960,830 L 1020,830 L 1020,880 L 1080,880 L 1080,810 L 1140,810 L 1140,860 L 1200,860 L 1200,900 L 1260,900 L 1260,820 L 1320,820 L 1320,850 L 1380,850 L 1380,780 L 1440,780 L 1440,840 L 1500,840 L 1500,890 L 1560,890 L 1560,830 L 1620,830 L 1620,870 L 1680,870 L 1680,800 L 1740,800 L 1740,850 L 1800,850 L 1800,910 L 1860,910 L 1860,840 L 1920,840 L 1920,1080 Z" 
+          fill="#1c1512" opacity="0.3" />
+
+    <!-- Near Layer (Darker) -->
+    <path d="M 0,1080 L 0,950 L 80,950 L 80,920 L 160,920 L 160,970 L 220,970 L 220,910 L 300,910 L 300,940 L 380,940 L 380,890 L 460,890 L 460,930 L 540,930 L 540,960 L 620,960 L 620,900 L 700,900 L 700,950 L 780,950 L 780,920 L 860,920 L 860,970 L 940,970 L 940,880 L 1020,880 L 1020,930 L 1100,930 L 1100,960 L 1180,960 L 1180,910 L 1260,910 L 1260,940 L 1340,940 L 1340,890 L 1420,890 L 1420,930 L 1500,930 L 1500,960 L 1580,960 L 1580,900 L 1660,900 L 1660,950 L 1740,950 L 1740,910 L 1820,910 L 1820,940 L 1920,940 L 1920,1080 Z" 
+          fill="#130f0c" opacity="0.6" />
+
+    <!-- Nearest Layer (Deepest Black) -->
+    <path d="M 0,1080 L 0,980 L 120,980 L 120,960 L 240,960 L 240,990 L 360,990 L 360,950 L 480,950 L 480,970 L 600,970 L 600,940 L 720,940 L 720,980 L 840,980 L 840,950 L 960,950 L 960,970 L 1080,970 L 1080,940 L 1200,940 L 1200,980 L 1320,980 L 1320,950 L 1440,950 L 1440,970 L 1560,970 L 1560,940 L 1680,940 L 1680,980 L 1800,980 L 1800,950 L 1920,950 L 1920,1080 Z" 
+          fill="#0d0a09" opacity="0.9" />
+  </svg>
+
+  <!-- Giant Ambient Lighting Glows -->
+  <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
+    <div class="absolute top-[20%] left-[10%] w-[600px] h-[600px] rounded-full bg-amber-900/10 blur-[130px] animate-pulse-slow"></div>
+    <div class="absolute bottom-[10%] right-[10%] w-[700px] h-[700px] rounded-full bg-[#d4a373]/10 blur-[150px] animate-pulse-slow" style="animation-delay: 2s;"></div>
+  </div>
+
+  <!-- Main Viewport Wrapper -->
+  <div class="w-full min-h-screen flex items-center justify-center relative z-10">
+    
+    <!-- PAGE 1: LOGIN (WEB COMPONENT) -->
+    <div id="login-page" class="w-full transition-all duration-500 opacity-100 scale-100">
+      <cozy-login></cozy-login>
+    </div>
+
+    <!-- PAGE 2: MAIN LAUNCHER DASHBOARD -->
+    <div id="dashboard-page" class="hidden w-full max-w-[1280px] h-auto lg:h-[720px] p-4 sm:p-6 lg:p-8 transition-all duration-500 opacity-0 scale-95 flex flex-col lg:flex-row gap-6">
+      
+      <!-- DESKTOP SIDEBAR PANEL -->
+      <aside class="hidden lg:flex w-[86px] h-full flex-col justify-between items-center py-8 bg-[#1a1411]/80 backdrop-blur-xl border border-[#d4a373]/25 rounded-[24px] shadow-[0_4px_30px_rgba(0,0,0,0.4)] relative shrink-0">
+        <!-- Logo at the top -->
+        <div class="border border-[#d4a373]/30 rounded-[14px] p-1.5 w-11 h-11 flex items-center justify-center bg-[#251d18]/70 shadow-[inset_0_1px_4px_rgba(0,0,0,0.3)]">
+          <svg class="w-7 h-7 text-[#d4a373]" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 3L3 14H7V27C7 28.1 7.9 29 9 29H23C24.1 29 25 28.1 25 27V14H29L16 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+            <path d="M22 8V6H25V10.5" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+            <path d="M13 29V20H19V29" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+            <rect x="13" y="11" width="6" height="5" rx="1" stroke="currentColor" stroke-width="2" />
+          </svg>
+        </div>
+
+        <!-- Vertical Menu tabs -->
+        <nav class="flex flex-col space-y-4 w-full px-2">
+          <!-- Account Tab -->
+          <button data-tab="account" class="tab-btn w-full py-3 flex flex-col items-center justify-center text-[#a99c92] hover:text-[#d4a373] rounded-xl hover:bg-[#2a201b]/50 transition-all duration-300 relative group">
+            <svg class="w-5 h-5 mb-1 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span class="text-[9px] font-semibold tracking-wider uppercase">аккаунт</span>
+            <div class="active-indicator absolute right-0 top-1/4 bottom-1/4 w-[3px] rounded-l bg-[#d4a373] opacity-0 transition-opacity"></div>
+          </button>
+
+          <!-- Play Tab (Active by default) -->
+          <button data-tab="play" class="tab-btn w-full py-3 flex flex-col items-center justify-center text-[#d4a373] rounded-xl bg-[#2a201b]/50 transition-all duration-300 relative group active">
+            <svg class="w-5 h-5 mb-1 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.07 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z" />
+            </svg>
+            <span class="text-[9px] font-semibold tracking-wider uppercase">играть</span>
+            <div class="active-indicator absolute right-0 top-1/4 bottom-1/4 w-[3px] rounded-l bg-[#d4a373] opacity-100 transition-opacity"></div>
+          </button>
+
+          <!-- Mods Tab -->
+          <button data-tab="mods" class="tab-btn w-full py-3 flex flex-col items-center justify-center text-[#a99c92] hover:text-[#d4a373] rounded-xl hover:bg-[#2a201b]/50 transition-all duration-300 relative group">
+            <svg class="w-5 h-5 mb-1 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2" />
+            </svg>
+            <span class="text-[9px] font-semibold tracking-wider uppercase">моды</span>
+            <div class="active-indicator absolute right-0 top-1/4 bottom-1/4 w-[3px] rounded-l bg-[#d4a373] opacity-0 transition-opacity"></div>
+          </button>
+
+          <!-- Map Tab -->
+          <button data-tab="map" class="tab-btn w-full py-3 flex flex-col items-center justify-center text-[#a99c92] hover:text-[#d4a373] rounded-xl hover:bg-[#2a201b]/50 transition-all duration-300 relative group">
+            <svg class="w-5 h-5 mb-1 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            <span class="text-[9px] font-semibold tracking-wider uppercase">карта</span>
+            <div class="active-indicator absolute right-0 top-1/4 bottom-1/4 w-[3px] rounded-l bg-[#d4a373] opacity-0 transition-opacity"></div>
+          </button>
+
+          <!-- Settings Tab -->
+          <button data-tab="settings" class="tab-btn w-full py-3 flex flex-col items-center justify-center text-[#a99c92] hover:text-[#d4a373] rounded-xl hover:bg-[#2a201b]/50 transition-all duration-300 relative group">
+            <svg class="w-5 h-5 mb-1 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            </svg>
+            <span class="text-[9px] font-semibold tracking-wider uppercase">настройки</span>
+            <div class="active-indicator absolute right-0 top-1/4 bottom-1/4 w-[3px] rounded-l bg-[#d4a373] opacity-0 transition-opacity"></div>
+          </button>
+        </nav>
+
+        <!-- Exit at the bottom -->
+        <button id="logout-btn" class="w-full py-3 flex flex-col items-center justify-center text-[#a99c92] hover:text-[#e76f51] rounded-xl hover:bg-[#e76f51]/10 transition-all duration-300 group">
+          <svg class="w-5 h-5 mb-1 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span class="text-[9px] font-semibold tracking-wider uppercase">выйти</span>
+        </button>
+      </aside>
+
+      <!-- MAIN APP CONTAINER -->
+      <main class="flex-grow min-w-0 bg-[#1a1411]/80 backdrop-blur-xl border border-[#d4a373]/25 rounded-[28px] p-5 sm:p-7 lg:p-9 shadow-[0_4px_30px_rgba(0,0,0,0.4)] relative flex flex-col justify-between overflow-hidden">
+        
+        <!-- Glow inside main area -->
+        <div class="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-[#d4a373]/5 blur-[100px] pointer-events-none"></div>
+
+        <!-- TOP BAR -->
+        <header class="flex items-center justify-between border-b border-[#d4a373]/25 pb-4 mb-6 relative z-10 shrink-0 gap-4">
+          <!-- Live Time and Server Online -->
+          <div class="flex items-center space-x-5 select-none">
+            <!-- Live Time -->
+            <div id="live-clock" class="font-unbounded text-sm font-bold text-white tracking-wide shrink-0">
+              12:00 PM
+            </div>
+            
+            <span class="bg-[#e63946]/15 text-[#e63946] border border-[#e63946]/30 px-2 py-0.5 rounded-[6px] text-[9px] font-bold uppercase tracking-wider select-none">Alpha</span>
+
+            <div class="w-px h-5 bg-[#d4a373]/25 shrink-0"></div>
+
+            <!-- Server Online -->
+            <div class="flex flex-col items-center cursor-default" title="Нажмите для обновления" id="server-status-widget">
+              <div class="border border-[#d4a373]/30 bg-[#251d18]/70 h-[34px] px-3 flex items-center gap-2 rounded-[8px] font-unbounded text-xs font-bold text-[#faedcd] shadow-[inset_0_2px_8px_rgba(0,0,0,0.3)] relative overflow-hidden min-w-[80px] justify-center">
+                <div class="absolute inset-0 bg-[#d4a373]/5 pointer-events-none"></div>
+                <!-- Status dot -->
+                <span id="server-status-dot" class="relative z-10 w-1.5 h-1.5 rounded-full bg-[#a99c92] shrink-0 transition-colors duration-500"></span>
+                <!-- Player count -->
+                <span id="server-online-count" class="relative z-10 tracking-wide">—/—</span>
+              </div>
+              <span id="server-online-label" class="text-[9px] text-[#a99c92] font-bold uppercase mt-1 tracking-wider whitespace-nowrap">онлайн сервера</span>
+            </div>
+          </div>
+
+          <!-- Social links -->
+          <div class="hidden md:flex items-center space-x-3">
+            <a href="#" class="w-8 h-8 rounded-full border border-[#d4a373]/20 bg-[#251d18]/40 flex items-center justify-center text-[#a99c92] hover:text-[#5865F2] hover:border-[#5865F2]/50 hover:shadow-[0_0_12px_rgba(88,101,242,0.3)] transition-all duration-300">
+              <!-- Discord -->
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.094 13.094 0 0 1-1.873-.894.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.009c.12.099.246.195.373.289a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z"/></svg>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-full border border-[#d4a373]/20 bg-[#251d18]/40 flex items-center justify-center text-[#a99c92] hover:text-[#0088cc] hover:border-[#0088cc]/50 hover:shadow-[0_0_12px_rgba(0,136,204,0.3)] transition-all duration-300">
+              <!-- Telegram -->
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+            </a>
+          </div>
+
+          <!-- User Card -->
+          <div class="flex items-center space-x-3 select-none">
+            <!-- Access level info -->
+            <div class="text-right hidden sm:block shrink-0">
+              <div class="flex items-center justify-end">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                <span class="text-xs font-semibold text-emerald-400">Проходка: куплена</span>
+              </div>
+              <span class="text-[9px] text-[#a99c92] font-bold uppercase tracking-wider">Подписка active</span>
+            </div>
+
+            <!-- Nickname and Head Avatar -->
+            <div class="flex items-center space-x-3 pl-3 border-l border-[#d4a373]/20 shrink-0">
+              <span class="user-display-name font-unbounded text-xs font-bold text-white tracking-wide max-w-[80px] sm:max-w-none truncate">xMonkeshax</span>
+              
+              <!-- Square avatar frame -->
+              <div class="w-10 h-10 rounded-[10px] border border-[#d4a373]/30 bg-[#251d18]/70 overflow-hidden flex items-center justify-center p-1 shadow-[inset_0_2px_6px_rgba(0,0,0,0.4)]">
+                <img class="user-display-avatar w-full h-full object-contain rounded-[6px]" src="https://mc-heads.net/avatar/xMonkeshax.png" alt="Avatar"
+                     onerror="this.onerror=null; this.src='https://minotar.net/avatar/Steve.png';">
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- SCREENS CONTENT CONTAINER -->
+        <div class="-ml-9 pl-9 flex-grow overflow-y-auto pr-1 relative z-10">
+          
+          <!-- TAB 1: PLAY SCREEN -->
+          <section id="tab-content-play" class="tab-pane flex flex-col space-y-6 slide-in">
+            <!-- Upper Section (Description, details) -->
+            <div class="space-y-4">
+              <!-- Big Title -->
+              <div class="relative inline-block select-none mt-2">
+                <span class="font-unbounded font-black text-white text-4xl sm:text-5xl md:text-6xl tracking-wider">COZY HOUSE</span>
+              </div>
+
+              <!-- Tags list -->
+              <div class="flex flex-wrap gap-2.5 pt-1 select-none">
+                <span class="bg-[#251d18]/50 border border-[#d4a373]/20 text-[#a99c92] px-3.5 py-1.5 rounded-[12px] font-outfit text-xs font-semibold tracking-wide" id="main-version-tag">Версия: 26.1.2</span>
+                <span class="bg-[#251d18]/50 border border-[#d4a373]/20 text-[#a99c92] px-3.5 py-1.5 rounded-[12px] font-outfit text-xs font-semibold tracking-wide">Уютная сборка</span>
+                <span class="bg-[#251d18]/50 border border-[#d4a373]/20 text-[#a99c92] px-3.5 py-1.5 rounded-[12px] font-outfit text-xs font-semibold tracking-wide">Выживание</span>
+              </div>
+
+              <!-- Text block -->
+              <p class="max-w-2xl text-sm sm:text-base text-[#a99c92] leading-relaxed pt-2">
+                Cozy House — это уютный лаунчер и сервер для выживания, созданный для теплой атмосферы, спокойного строительства и комфортной игры в кругу друзей.
+              </p>
+            </div>
+
+            <!-- Lower Section (Play Button area + News) -->
+            <div class="space-y-6">
+              <!-- Launch Controls -->
+              <div class="flex items-center space-x-4">
+                <!-- Large Play Button or Progress Bar -->
+                <div id="play-controller-container" class="w-[240px] h-[58px]">
+                  <button id="dashboard-play-btn" class="w-full h-full bg-[#d4a373] hover:bg-[#c69362] transition-all duration-300 rounded-[18px] flex items-center justify-center select-none cursor-pointer shadow-[0_4px_24px_-2px_rgba(212,163,115,0.4)] hover:shadow-[0_6px_30px_rgba(212,163,115,0.55)] active:scale-[0.98] group relative">
+                    <div class="absolute left-2 w-10 h-10 rounded-full bg-[#8f6848] flex items-center justify-center transition-all duration-300 group-hover:bg-[#725237] group-hover:scale-105">
+                      <!-- Play Arrow Icon -->
+                      <svg class="w-4 h-4 text-white fill-current group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                    <span class="text-white font-unbounded font-black text-base tracking-wider uppercase">ИГРАТЬ</span>
+                  </button>
+                </div>
+
+                <!-- Refresh/Sync button -->
+                <button id="dashboard-sync-btn" class="w-[58px] h-[58px] rounded-[18px] border border-[#d4a373]/25 bg-[#251d18]/50 hover:bg-[#1a1411] hover:border-[#d4a373]/40 flex items-center justify-center text-[#a99c92] hover:text-white transition-all cursor-pointer group active:scale-[0.95]" title="Перезагрузить клиент">
+                  <svg class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3m-3-3v12" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- News Area -->
+              <div class="space-y-2.5">
+                <span id="news-title-label" class="block font-outfit text-[#a99c92] text-[11px] font-bold tracking-wider uppercase select-none">Новости и акции</span>
+
+                <!-- Dynamic news cards — populated by fetchNews() -->
+                <div id="news-cards-container" class="flex flex-row overflow-x-auto gap-3 pt-2 pb-3 pl-1 pr-2 scrollbar-none select-none">
+                  <!-- Skeleton placeholders while loading -->
+                  <div class="news-skeleton shrink-0 w-[240px] h-[120px] rounded-[20px] bg-[#251d18]/50 border border-[#d4a373]/10 animate-pulse"></div>
+                  <div class="news-skeleton shrink-0 w-[240px] h-[120px] rounded-[20px] bg-[#251d18]/50 border border-[#d4a373]/10 animate-pulse"></div>
+                  <div class="news-skeleton shrink-0 w-[240px] h-[120px] rounded-[20px] bg-[#251d18]/50 border border-[#d4a373]/10 animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- TAB 2: MODS SCREEN -->
+          <section id="tab-content-mods" class="tab-pane hidden flex flex-col h-full slide-in">
+            <div class="flex flex-col lg:flex-row gap-6 h-full items-stretch">
+              
+              <!-- Left Internal Submenu: Vertical on Desktop, Horizontal Scroll on Mobile -->
+              <div class="flex lg:flex-col lg:w-[200px] shrink-0 border-b lg:border-b-0 lg:border-r border-[#d4a373]/20 pb-4 lg:pb-0 lg:pr-4 overflow-x-auto scrollbar-none gap-2 select-none">
+                <button data-subtab="mods-items" class="subtab-btn px-4 py-2.5 rounded-xl text-left text-xs font-semibold uppercase tracking-wider transition-all duration-300 w-auto lg:w-full shrink-0 flex items-center space-x-2 bg-[#d4a373]/20 text-[#d4a373] active">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2" /></svg>
+                  <span>Моды</span>
+                </button>
+                <button data-subtab="mods-resourcepacks" class="subtab-btn px-4 py-2.5 rounded-xl text-left text-xs font-semibold uppercase tracking-wider transition-all duration-300 w-auto lg:w-full shrink-0 flex items-center space-x-2 text-[#a99c92] hover:text-[#d4a373] hover:bg-[#2a201b]/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  <span>Ресурс-паки</span>
+                </button>
+                <button data-subtab="mods-shaders" class="subtab-btn px-4 py-2.5 rounded-xl text-left text-xs font-semibold uppercase tracking-wider transition-all duration-300 w-auto lg:w-full shrink-0 flex items-center space-x-2 text-[#a99c92] hover:text-[#d4a373] hover:bg-[#2a201b]/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707" /></svg>
+                  <span>Шейдеры</span>
+                </button>
+              </div>
+
+              <!-- Right Content Area -->
+              <div class="flex-grow pr-1 relative flex flex-col justify-between">
+                <div class="flex-grow pb-4">
+                  <!-- SUB-TAB: MODS -->
+                  <div id="subtab-content-mods-items" class="subtab-pane space-y-4">
+                    <div>
+                      <h3 class="font-unbounded font-black text-xl text-white select-none">Моды</h3>
+                      <p class="text-xs text-[#a99c92] mt-1 select-none">Список клиентских модов, которые вы можете включить или выключить.</p>
+                    </div>
+                    <div id="mods-items-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 pr-1 pb-4">
+                      <!-- Rendered by JS -->
+                    </div>
+                  </div>
+
+                  <!-- SUB-TAB: RESOURCE PACKS -->
+                  <div id="subtab-content-mods-resourcepacks" class="subtab-pane hidden space-y-4">
+                    <div>
+                      <h3 class="font-unbounded font-black text-xl text-white select-none">Ресурс-паки</h3>
+                      <p class="text-xs text-[#a99c92] mt-1 select-none">Список пакетов ресурсов, которые вы можете включить или выключить, а также добавить свои.</p>
+                    </div>
+                    <div id="mods-resourcepacks-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 pr-1 pb-4">
+                      <!-- Rendered by JS -->
+                    </div>
+                  </div>
+
+                  <!-- SUB-TAB: SHADERS -->
+                  <div id="subtab-content-mods-shaders" class="subtab-pane hidden space-y-4">
+                    <div>
+                      <h3 class="font-unbounded font-black text-xl text-white select-none">Шейдеры</h3>
+                      <p class="text-xs text-[#a99c92] mt-1 select-none">Список шейдеров, которые вы можете включить или выключить, а также добавить свои.</p>
+                    </div>
+                    <div id="mods-shaders-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 pr-1 pb-4">
+                      <!-- Rendered by JS -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Action Footer -->
+                <div class="pt-4 shrink-0 flex items-center justify-start border-t border-[#d4a373]/20 bg-[#251d18]/20">
+                  <button id="add-mods-btn" class="flex items-center space-x-2.5 bg-[#d4a373]/15 border border-[#d4a373]/45 hover:bg-[#d4a373]/25 active:scale-[0.98] text-white font-semibold py-3 px-5 rounded-[16px] transition-all text-xs select-none cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    <span id="add-mods-btn-text">Добавить свои</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- TAB 3: ACCOUNT SCREEN -->
+          <section id="tab-content-account" class="tab-pane hidden flex flex-col space-y-6 slide-in">
+            <!-- Grid Layout of account items -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              
+              <!-- Player Stats Card -->
+              <div class="bg-[#251d18]/50 border border-[#d4a373]/25 p-6 rounded-[24px] flex flex-col justify-between space-y-4 lg:col-span-2">
+                <!-- Player Profile Top -->
+                <div class="flex items-center justify-between pb-3 border-b border-[#d4a373]/20">
+                  <div class="flex items-center space-x-4">
+                    <!-- Skin head -->
+                    <div class="w-16 h-16 rounded-[16px] border border-[#d4a373]/30 bg-[#251d18]/70 overflow-hidden flex items-center justify-center p-1.5 shadow-[inset_0_2px_6px_rgba(0,0,0,0.4)]">
+                      <img class="user-display-avatar w-full h-full object-contain rounded-[10px]" src="https://mc-heads.net/avatar/xMonkeshax.png" alt="Avatar"
+                           onerror="this.onerror=null; this.src='https://minotar.net/avatar/Steve.png';">
+                    </div>
+                    <div>
+                      <div class="flex items-center space-x-2">
+                        <span class="acc-username-display font-unbounded text-base font-bold text-white tracking-wide">xMonkeshax</span>
+                        <span class="bg-[#e76f51]/20 text-[#f4a261] border border-[#e76f51]/40 px-2 py-0.5 rounded-[6px] text-[9px] font-bold uppercase tracking-wider select-none">Админ</span>
+                      </div>
+                      <span class="text-xs text-emerald-400 font-semibold flex items-center mt-1">
+                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></span>Проходка: куплена
+                      </span>
+                    </div>
+                  </div>
+                  <!-- Balance -->
+                  <div class="text-right">
+                    <span class="text-[9px] text-[#a99c92] font-bold uppercase tracking-wider block">Ваш баланс</span>
+                    <span id="acc-balance-display" class="font-unbounded text-sm font-bold text-[#faedcd] bg-[#251d18]/70 px-3 py-1 border border-[#d4a373]/30 rounded-lg block mt-1">0 АР</span>
+                  </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 py-2">
+                  <div>
+                    <span class="text-[9px] text-[#a99c92] font-bold uppercase tracking-wider block">Проведено в игре</span>
+                    <span class="text-sm font-semibold text-white mt-1 block">1273ч 30м</span>
+                  </div>
+                  <div>
+                    <span class="text-[9px] text-[#a99c92] font-bold uppercase tracking-wider block">Убито мобов</span>
+                    <span class="text-sm font-semibold text-white mt-1 block">192034</span>
+                  </div>
+                  <div>
+                    <span class="text-[9px] text-[#a99c92] font-bold uppercase tracking-wider block">Кол.во смертей</span>
+                    <span class="text-sm font-semibold text-white mt-1 block">95</span>
+                  </div>
+                  <div>
+                    <span class="text-[9px] text-[#a99c92] font-bold uppercase tracking-wider block">Дата регистрации</span>
+                    <span class="text-sm font-semibold text-white mt-1 block">10.12.2024</span>
+                  </div>
+                  <div>
+                    <span class="text-[9px] text-[#a99c92] font-bold uppercase tracking-wider block">Последний вход</span>
+                    <span class="text-sm font-semibold text-white mt-1 block">23.12.2025</span>
+                  </div>
+                  <div>
+                    <span class="text-[9px] text-[#a99c92] font-bold uppercase tracking-wider block">На проекте</span>
+                    <span class="text-sm font-semibold text-white mt-1 block">1 год</span>
+                  </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                  <button class="flex-grow bg-[#d4a373]/15 border border-[#d4a373]/45 hover:bg-[#d4a373]/25 text-white font-semibold py-3 px-5 rounded-[16px] text-xs transition-colors cursor-pointer select-none">
+                    Купить проходку
+                  </button>
+                  <button class="flex-grow bg-[#d4a373]/15 border border-[#d4a373]/45 hover:bg-[#d4a373]/25 text-white font-semibold py-3 px-5 rounded-[16px] text-xs transition-colors cursor-pointer select-none">
+                    Пополнить баланс
+                  </button>
+                </div>
+              </div>
+
+              <!-- 3D Skin Preview Card -->
+              <div class="bg-[#251d18]/50 border border-[#d4a373]/25 p-6 rounded-[24px] flex flex-col items-center justify-between min-h-[300px] relative overflow-hidden group">
+                <div class="absolute inset-0 bg-[#d4a373]/5 pointer-events-none blur-2xl"></div>
+                <!-- Label -->
+                <div class="flex justify-between items-center w-full pb-2 border-b border-[#d4a373]/20 select-none">
+                  <span class="text-xs font-bold text-white font-unbounded">Предпросмотр скина</span>
+                  <span id="active-skin-label" class="text-[9px] font-bold text-[#faedcd] bg-[#d4a373]/20 px-2 py-0.5 rounded-[6px] tracking-wide uppercase font-unbounded">xMonkeshax</span>
+                </div>
+                <!-- Skin Image -->
+                <div class="flex-grow flex items-center justify-center py-4 relative z-10 w-full min-h-[200px]">
+                  <img id="skin-body-preview" class="h-[210px] object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)] transform group-hover:scale-105 transition-transform duration-500" 
+                       src="https://mc-heads.net/body/xMonkeshax.png" alt="Skin Body Preview"
+                       onerror="this.onerror=null; this.src='https://mc-heads.net/body/Steve.png';">
+                </div>
+              </div>
+
+              <!-- Saved Skins Card -->
+              <div class="bg-[#251d18]/50 border border-[#d4a373]/25 p-6 rounded-[24px] flex flex-col space-y-4 md:col-span-2 lg:col-span-1">
+                <span class="text-xs font-bold text-white font-unbounded pb-2 border-b border-[#d4a373]/20 block select-none">Сохранённые скины</span>
+
+                <div id="saved-skins-grid" class="flex flex-row gap-3 overflow-x-auto scrollbar-none pb-1">
+                  <!-- Add Skin Button -->
+                  <button id="add-skin-card-btn" class="shrink-0 w-[72px] h-[112px] border border-dashed border-[#d4a373]/30 hover:border-[#d4a373]/60 bg-[#251d18]/20 hover:bg-[#251d18]/40 rounded-[16px] p-3 flex flex-col items-center justify-center space-y-2 text-[#a99c92] hover:text-[#d4a373] transition-all cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-center leading-none">Добавить<br>скин</span>
+                  </button>
+
+                  <!-- Saved Skin 1 -->
+                  <div data-skin-id="xMonkeshax" class="saved-skin-card shrink-0 w-[72px] h-[112px] border-2 border-[#d4a373] active-skin bg-[#251d18]/60 rounded-[16px] p-1.5 flex flex-col items-center justify-center cursor-pointer hover:border-[#d4a373]/80 transition-all select-none relative group overflow-hidden">
+                    <div class="absolute inset-0 bg-[#d4a373]/5 pointer-events-none active-skin-glow"></div>
+                    <button class="skin-delete-btn absolute top-1 right-1 w-4 h-4 bg-[#e63946]/90 hover:bg-[#e63946] rounded-full items-center justify-center hidden group-hover:flex z-20">
+                      <svg class="w-2 h-2 text-white pointer-events-none" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                    <img class="h-[90px] object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,0.5)] transform group-hover:scale-105 transition-transform pointer-events-none"
+                         src="https://mc-heads.net/body/xMonkeshax.png" alt="Active Skin"
+                         onerror="this.onerror=null; this.src='https://mc-heads.net/body/Steve.png';">
+                  </div>
+
+                  <!-- Saved Skin 2 -->
+                  <div data-skin-id="Notch" class="saved-skin-card shrink-0 w-[72px] h-[112px] border border-[#d4a373]/20 hover:border-[#d4a373]/45 bg-[#251d18]/60 rounded-[16px] p-1.5 flex flex-col items-center justify-center cursor-pointer transition-all select-none relative group overflow-hidden">
+                    <button class="skin-delete-btn absolute top-1 right-1 w-4 h-4 bg-[#e63946]/90 hover:bg-[#e63946] rounded-full items-center justify-center hidden group-hover:flex z-20">
+                      <svg class="w-2 h-2 text-white pointer-events-none" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                    <img class="h-[90px] object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,0.5)] transform group-hover:scale-105 transition-transform pointer-events-none"
+                         src="https://mc-heads.net/body/Notch.png" alt="Notch Skin"
+                         onerror="this.onerror=null; this.src='https://mc-heads.net/body/Steve.png';">
+                  </div>
+                </div>
+                
+                <!-- Helper text -->
+                <div class="border-t border-[#d4a373]/20 pt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+                  <div class="text-left select-none">
+                    <span class="text-[10px] text-[#a99c92] font-bold uppercase tracking-wider block">Загрузить скин</span>
+                    <span class="text-[9px] text-[#a99c92]/60 leading-tight block mt-0.5">Вставьте никнейм игрока</span>
+                  </div>
+                  <div class="flex w-full sm:w-auto space-x-1.5">
+                    <input type="text" id="skin-search-input" placeholder="Никнейм..."
+                      class="px-3 py-1.5 bg-[#0e0a08] border border-[#31251e] rounded-[10px] text-white font-outfit text-xs placeholder-[#5c4e43] focus:border-[#d4a373] w-full sm:w-[120px] transition-all">
+                    <button id="search-skin-btn" class="bg-[#d4a373] hover:bg-[#c69362] text-white font-semibold py-1.5 px-3.5 rounded-[10px] text-xs transition-all shrink-0 cursor-pointer">
+                      Ввод
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Inventory Card Section -->
+            <div class="bg-[#251d18]/50 border border-[#d4a373]/25 p-6 rounded-[24px] space-y-4">
+              <span class="text-xs font-bold text-white font-unbounded pb-2 border-b border-[#d4a373]/20 block select-none">Ваш инвентарь</span>
+              
+              <div class="flex flex-col xl:flex-row gap-6">
+                
+                <!-- Character Armor Column -->
+                <div class="flex flex-col sm:flex-row items-center sm:justify-center xl:justify-start gap-4 xl:w-[25%] shrink-0">
+                  <!-- Armor grid left slots -->
+                  <div class="flex sm:flex-col gap-2.5">
+                    <div class="w-11 h-11 bg-[#0e0a08] border border-[#31251e] hover:border-[#d4a373] rounded-[10px] flex items-center justify-center cursor-pointer transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]" title="Шлем">
+                      <svg class="w-5 h-5 text-[#a99c92]/40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a5 5 0 00-5 5v1a5 5 0 0010 0V7a5 5 0 00-5-5zM4 14a2 2 0 012-2h12a2 2 0 012 2v2a6 6 0 01-12 0v-2z" /></svg>
+                    </div>
+                    <div class="w-11 h-11 bg-[#0e0a08] border border-[#31251e] hover:border-[#d4a373] rounded-[10px] flex items-center justify-center cursor-pointer transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]" title="Нагрудник">
+                      <svg class="w-5 h-5 text-[#a99c92]/40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16l-2 4v4H6V8L4 4zM6 12v6a2 2 0 002 2h8a2 2 0 002-2v-6H6z" /></svg>
+                    </div>
+                  </div>
+
+                  <!-- Character Preview Frame -->
+                  <div class="w-[110px] h-[160px] bg-[#0e0a08]/60 border border-[#31251e]/40 rounded-[18px] flex items-center justify-center p-2 relative overflow-hidden shadow-[inset_0_2px_6px_rgba(0,0,0,0.4)]">
+                    <img id="inventory-character-body" class="h-[135px] object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" src="https://mc-heads.net/body/xMonkeshax.png" alt="Player Inventory Skin"
+                         onerror="this.onerror=null; this.src='https://mc-heads.net/body/Steve.png';">
+                  </div>
+
+                  <!-- Armor grid right slots -->
+                  <div class="flex sm:flex-col gap-2.5">
+                    <div class="w-11 h-11 bg-[#0e0a08] border border-[#31251e] hover:border-[#d4a373] rounded-[10px] flex items-center justify-center cursor-pointer transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]" title="Поножи">
+                      <svg class="w-5 h-5 text-[#a99c92]/40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 3h12v7l-2 1v10H8V11L6 10V3z" /></svg>
+                    </div>
+                    <div class="w-11 h-11 bg-[#0e0a08] border border-[#31251e] hover:border-[#d4a373] rounded-[10px] flex items-center justify-center cursor-pointer transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]" title="Ботинки">
+                      <svg class="w-5 h-5 text-[#a99c92]/40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 19v-2h4v-3h6v3h4v2H5zM8 3v8h8V3H8z" /></svg>
+                    </div>
+                  </div>
+
+                  <!-- Offhand slot -->
+                  <div class="w-11 h-11 bg-[#0d0b15] border border-[#25203b] hover:border-[#8f75ff] rounded-[10px] flex items-center justify-center cursor-pointer transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] sm:ml-2" title="Вторая рука / Щит">
+                    <svg class="w-5 h-5 text-[#736a8e]/40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L4 5v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V5l-8-3z" /></svg>
+                  </div>
+                </div>
+
+                <!-- Inventory Grid and Stats Area -->
+                <div class="flex-grow space-y-4">
+                  <!-- Stats summary (HP, Hunger, Exp, Coords) -->
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#0e0a08]/40 border border-[#31251e]/40 rounded-[16px] p-3.5 select-none text-xs">
+                    <div>
+                      <span class="text-[#a99c92] font-semibold">ХП</span>
+                      <span class="font-unbounded font-bold text-rose-400 mt-1 flex items-center">
+                        <svg class="w-3.5 h-3.5 mr-1 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        3/20
+                      </span>
+                    </div>
+                    <div>
+                      <span class="text-[#a99c92] font-semibold">Голод</span>
+                      <span class="font-unbounded font-bold text-amber-500 mt-1 flex items-center">
+                        <svg class="w-3.5 h-3.5 mr-1 fill-current" viewBox="0 0 24 24"><path d="M12 3c-1.2 0-2.4.4-3.4 1.2L7.2 2.8c-.4-.4-1-.4-1.4 0s-.4 1 0 1.4L7.2 5.6C6.4 6.6 6 7.8 6 9v2c0 3.3 2.7 6 6 6s6-2.7 6-6V9c0-1.2-.4-2.4-1.2-3.4l1.4-1.4c.4-.4.4-1 0-1.4s-1-.4-1.4 0L15.4 4.2C14.4 3.4 13.2 3 12 3zm0 16c-3.9 0-7 3.1-7 7h14c0-3.9-3.1-7-7-7z"/></svg>
+                        20/20
+                      </span>
+                    </div>
+                    <div>
+                      <span class="text-[#a99c92] font-semibold">Шкала опыта</span>
+                      <span class="font-unbounded font-bold text-emerald-400 mt-1 block">192 lvl</span>
+                    </div>
+                    <div>
+                      <span class="text-[#a99c92] font-semibold">Координаты</span>
+                      <span class="font-bold text-white mt-1 block">309, 50, -349</span>
+                    </div>
+                  </div>
+
+                  <!-- Inventory Grid (scaled with grid width) -->
+                  <div class="overflow-x-auto pb-1">
+                    <div class="min-w-[420px] max-w-[540px] space-y-2.5 mx-auto xl:mx-0">
+                      <!-- 3 Rows of Main Inventory -->
+                      <div id="inv-grid-main" class="grid grid-cols-9 gap-2">
+                        <!-- Filled by JS -->
+                      </div>
+                      
+                      <!-- Separator Line -->
+                      <div class="h-px bg-[#d4a373]/20 rounded-full my-1"></div>
+
+                      <!-- Hotbar Row -->
+                      <div id="inv-grid-hotbar" class="grid grid-cols-9 gap-2">
+                        <!-- Filled by JS -->
+                      </div>
+                    </div>
+                  </div>
+                  
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          <!-- TAB 4: MAP SCREEN -->
+          <section id="tab-content-map" class="tab-pane hidden flex flex-col h-full slide-in" style="min-height: 0;">
+            <div class="flex flex-col h-full space-y-3">
+              <div class="flex items-start justify-between shrink-0">
+                <div>
+                  <h2 class="font-unbounded font-black text-2xl sm:text-3xl text-white select-none">Карта сервера</h2>
+                  <p class="text-sm text-[#a99c92] mt-1.5">Dynmap — живая карта в реальном времени.</p>
+                </div>
+                <button id="map-open-browser-btn" title="Открыть в браузере" class="hidden mt-1 p-2 rounded-xl text-[#a99c92] hover:text-[#d4a373] hover:bg-[#2a201b]/50 transition-all">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                </button>
+              </div>
+
+              <!-- Lock screen — shown when user has no map privilege -->
+              <div id="map-lock" class="hidden flex-grow bg-[#251d18]/50 border border-[#d4a373]/25 rounded-[24px] flex flex-col items-center justify-center space-y-4">
+                <svg class="w-14 h-14 text-[#d4a373]/40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                </svg>
+                <div class="text-center space-y-1">
+                  <p class="text-white font-semibold">Карта только для привилегированных игроков</p>
+                  <p class="text-[#a99c92] text-sm">Приобрети привилегию, чтобы открыть онлайн-карту.</p>
+                </div>
+                <button onclick="electronAPI.openExternal('https://play.he1per.com')" class="px-5 py-2 rounded-xl bg-[#d4a373]/20 hover:bg-[#d4a373]/30 text-[#d4a373] text-sm font-semibold transition-all">
+                  Магазин привилегий
+                </button>
+              </div>
+
+              <!-- Loading placeholder while webview initialises -->
+              <div id="map-loading" class="flex-grow bg-[#251d18]/50 border border-[#d4a373]/25 rounded-[24px] flex flex-col items-center justify-center space-y-3">
+                <div class="w-8 h-8 border-2 border-[#d4a373]/30 border-t-[#d4a373] rounded-full animate-spin"></div>
+                <p class="text-[#a99c92] text-sm">Загрузка карты…</p>
+              </div>
+
+              <!-- Dynmap webview — shown for users with map privilege -->
+              <webview
+                id="dynmap-webview"
+                src="about:blank"
+                class="hidden flex-grow rounded-[24px] border border-[#d4a373]/25"
+                style="min-height: 420px; flex: 1 1 0%;"
+              ></webview>
+            </div>
+          </section>
+
+          <!-- TAB 5: SETTINGS SCREEN -->
+          <section id="tab-content-settings" class="tab-pane hidden flex flex-col h-full slide-in">
+            <div class="flex flex-col lg:flex-row gap-6 h-full items-stretch">
+              
+              <!-- Left Internal Submenu: Vertical on Desktop, Horizontal Scroll on Mobile -->
+              <div class="flex lg:flex-col lg:w-[200px] shrink-0 border-b lg:border-b-0 lg:border-r border-[#d4a373]/20 pb-4 lg:pb-0 lg:pr-4 overflow-x-auto scrollbar-none gap-2 select-none">
+                <button data-settings-subtab="settings-appearance" class="settings-subtab-btn px-4 py-2.5 rounded-xl text-left text-xs font-semibold uppercase tracking-wider transition-all duration-300 w-auto lg:w-full shrink-0 flex items-center space-x-2 text-[#a99c92] hover:text-[#d4a373] hover:bg-[#2a201b]/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.24 2H8.76C6.13 2 4 4.13 4 6.76v10.48C4 19.87 6.13 22 8.76 22h6.48c2.63 0 4.76-2.13 4.76-4.76V6.76C20 4.13 17.87 2 15.24 2z M9.5 7h5M9.5 11h5M9.5 15h3" /></svg>
+                  <span>Внешность</span>
+                </button>
+                <button data-settings-subtab="settings-window" class="settings-subtab-btn px-4 py-2.5 rounded-xl text-left text-xs font-semibold uppercase tracking-wider transition-all duration-300 w-auto lg:w-full shrink-0 flex items-center space-x-2 bg-[#d4a373]/20 text-[#d4a373] active">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13V5a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg>
+                  <span>Окно</span>
+                </button>
+                <button data-settings-subtab="settings-java" class="settings-subtab-btn px-4 py-2.5 rounded-xl text-left text-xs font-semibold uppercase tracking-wider transition-all duration-300 w-auto lg:w-full shrink-0 flex items-center space-x-2 text-[#a99c92] hover:text-[#d4a373] hover:bg-[#2a201b]/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" /></svg>
+                  <span>Java и память</span>
+                </button>
+                <button data-settings-subtab="settings-resources" class="settings-subtab-btn px-4 py-2.5 rounded-xl text-left text-xs font-semibold uppercase tracking-wider transition-all duration-300 w-auto lg:w-full shrink-0 flex items-center space-x-2 text-[#a99c92] hover:text-[#d4a373] hover:bg-[#2a201b]/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2" /></svg>
+                  <span>Ресурсы</span>
+                </button>
+                <div class="hidden lg:block text-[10px] text-[#a99c92]/50 mt-auto select-none pt-4">
+                  <div>Cozy House Launcher v1.0 (Alpha)</div>
+                  <div class="mt-0.5">Windows 10.0.22631</div>
+                </div>
+              </div>
+
+              <!-- Right Settings Content Panel -->
+              <div class="flex-grow overflow-y-auto overflow-x-hidden pr-1 relative z-10 flex flex-col justify-between h-[420px] lg:h-[480px]">
+                
+                <div class="flex-grow pb-4">
+                  <!-- SUB-TAB CONTENT: Appearance -->
+                  <div id="settings-content-appearance" class="settings-pane hidden space-y-4">
+                    <div>
+                      <h3 class="font-unbounded font-black text-xl text-white select-none">Внешность</h3>
+                      <p class="text-xs text-[#a99c92] mt-1 select-none">Настройте внешний вид клиента и лаунчера.</p>
+                    </div>
+                    <div class="bg-[#251d18]/40 border border-[#d4a373]/20 rounded-[20px] p-5 space-y-4">
+                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#d4a373]/20">
+                        <div>
+                          <h5 class="text-xs font-bold text-white font-unbounded">Цветовая тема</h5>
+                          <p class="text-[10px] text-[#a99c92] mt-0.5">Выберите цветовую схему оформления</p>
+                        </div>
+                        <select id="settings-theme-select" class="w-full sm:w-[220px] px-3.5 py-2.5 bg-[#0e0a08] border border-[#31251e] rounded-[12px] text-white text-xs outline-none focus:border-[#d4a373] appearance-none cursor-pointer">
+                          <option value="cozy-beige">Уютный Бежевый (по умолчанию)</option>
+                          <option value="nether-red">Адский Красный</option>
+                          <option value="ender-blue">Эндер Голубой</option>
+                        </select>
+                      </div>
+                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <h5 class="text-xs font-bold text-white font-unbounded">Язык лаунчера</h5>
+                          <p class="text-[10px] text-[#a99c92] mt-0.5">Выберите язык интерфейса</p>
+                        </div>
+                        <select id="settings-lang-select" class="w-full sm:w-[220px] px-3.5 py-2.5 bg-[#0e0a08] border border-[#31251e] rounded-[12px] text-white text-xs outline-none focus:border-[#d4a373] appearance-none cursor-pointer">
+                          <option value="ru">Русский (Russian)</option>
+                          <option value="en">English (English)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- SUB-TAB CONTENT: Window (Matches 214017.png) -->
+                  <div id="settings-content-window" class="settings-pane space-y-4">
+                    <div>
+                      <h3 class="font-unbounded font-black text-xl text-white select-none">Настройки</h3>
+                      <p class="text-xs text-[#a99c92] mt-1 select-none">Здесь вы можете настроить клиент и лаунчер как вам удобно.</p>
+                    </div>
+                    
+                    <div class="bg-[#251d18]/40 border border-[#d4a373]/20 rounded-[20px] p-6 space-y-5">
+                      <!-- Fullscreen Toggle -->
+                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#d4a373]/20">
+                        <div class="max-w-xl">
+                          <h5 class="text-sm font-bold text-white font-unbounded">Полный экран</h5>
+                          <p class="text-xs text-[#a99c92] mt-0.5 leading-relaxed">Запускайте игру в полноэкранном режиме (с помощью options.txt).</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer select-none shrink-0">
+                          <input type="checkbox" id="settings-fullscreen" class="sr-only peer">
+                          <div class="w-10 h-6 bg-[#31251e] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-[#a99c92] peer-checked:after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#8cb369] transition-colors duration-300"></div>
+                        </label>
+                      </div>
+
+                      <!-- Width Field -->
+                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#d4a373]/20">
+                        <div class="max-w-xl">
+                          <h5 class="text-sm font-bold text-white font-unbounded">Ширина</h5>
+                          <p class="text-xs text-[#a99c92] mt-0.5 leading-relaxed">Ширина игрового окна при запуске.</p>
+                        </div>
+                        <input type="number" id="settings-width" value="854"
+                          class="w-full sm:w-[150px] px-4 py-3 bg-[#0e0a08]/60 border border-[#31251e] rounded-[12px] text-white font-outfit text-sm text-center outline-none focus:border-[#d4a373] focus:ring-2 focus:ring-[#d4a373]/15 hover:border-[#4d3b30] transition-all">
+                      </div>
+
+                      <!-- Height Field -->
+                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="max-w-xl">
+                          <h5 class="text-sm font-bold text-white font-unbounded">Высота</h5>
+                          <p class="text-xs text-[#a99c92] mt-0.5 leading-relaxed">Высота игрового окна при запуске.</p>
+                        </div>
+                        <input type="number" id="settings-height" value="480"
+                          class="w-full sm:w-[150px] px-4 py-3 bg-[#0e0a08]/60 border border-[#31251e] rounded-[12px] text-white font-outfit text-sm text-center outline-none focus:border-[#d4a373] focus:ring-2 focus:ring-[#d4a373]/15 hover:border-[#4d3b30] transition-all">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- SUB-TAB CONTENT: Java & memory -->
+                  <div id="settings-content-java" class="settings-pane hidden space-y-4">
+                    <div>
+                      <h3 class="font-unbounded font-black text-xl text-white select-none">Java и память</h3>
+                      <p class="text-xs text-[#a99c92] mt-1 select-none">Настройте пути выполнения Java и оперативную память для клиента.</p>
+                    </div>
+                    <div class="bg-[#251d18]/40 border border-[#d4a373]/20 rounded-[20px] p-6 space-y-5">
+                      <!-- RAM Slider -->
+                      <div class="space-y-3 pb-4 border-b border-[#d4a373]/20">
+                        <div class="flex justify-between items-center">
+                          <div>
+                            <h5 class="text-sm font-bold text-white font-unbounded">Выделение оперативной памяти</h5>
+                            <p class="text-xs text-[#a99c92] mt-0.5">Рекомендуется выделить половину доступной памяти</p>
+                          </div>
+                          <span id="settings-ram-val" class="text-xs font-bold font-unbounded text-[#faedcd] bg-[#251d18]/70 px-3 py-1 border border-[#d4a373]/30 rounded-lg">4096 МБ (4 ГБ)</span>
+                        </div>
+                        <input type="range" id="settings-ram-slider" min="2048" max="16384" step="1024" value="4096"
+                          class="w-full h-2 bg-[#0e0a08] border border-[#31251e] rounded-lg appearance-none cursor-pointer accent-[#d4a373]">
+                        <div class="relative h-4 text-[9px] text-[#a99c92] font-bold uppercase select-none mt-1">
+                          <span class="absolute" style="left: calc(0% + 8px); transform: translateX(-50%);">2 ГБ</span>
+                          <span class="absolute" style="left: calc(14.285% + 5.71px); transform: translateX(-50%);">4 ГБ</span>
+                          <span class="absolute" style="left: calc(42.857% + 1.14px); transform: translateX(-50%);">8 ГБ</span>
+                          <span class="absolute" style="left: calc(71.428% - 3.43px); transform: translateX(-50%);">12 ГБ</span>
+                          <span class="absolute" style="left: calc(100% - 8px); transform: translateX(-50%);">16 ГБ</span>
+                        </div>
+                      </div>
+
+                      <!-- Java Executable Path Field -->
+                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#d4a373]/20">
+                        <div>
+                          <h5 class="text-sm font-bold text-white font-unbounded">Путь к Java</h5>
+                          <p class="text-xs text-[#a99c92] mt-0.5">Путь к исполняемому файлу javaw.exe (или java)</p>
+                          <p id="settings-java-detected-path" class="text-[10px] text-[#d4a373] mt-1.5 break-all max-w-[260px]"></p>
+                        </div>
+                        <div class="flex w-full sm:w-auto space-x-2">
+                          <input type="text" id="settings-java-path" readonly value="java" class="px-3.5 py-2.5 bg-[#0e0a08] border border-[#31251e] text-[#a99c92] rounded-[12px] text-xs w-full sm:w-[220px] outline-none">
+                          <button id="settings-java-path-browse" class="bg-[#d4a373]/20 border border-[#d4a373]/40 hover:bg-[#d4a373]/30 text-white font-semibold py-2 px-4 rounded-[12px] text-xs transition-colors shrink-0 cursor-pointer">Обзор</button>
+                        </div>
+                      </div>
+
+                      <!-- Client version selector -->
+                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <h5 class="text-sm font-bold text-white font-unbounded">Версия Minecraft</h5>
+                          <p class="text-xs text-[#a99c92] mt-0.5">Выберите загружаемый клиент</p>
+                        </div>
+                        <select id="settings-client-version" disabled class="w-full sm:w-[220px] px-3.5 py-2.5 bg-[#0e0a08] border border-[#31251e] rounded-[12px] text-white/50 text-xs outline-none opacity-60 cursor-not-allowed">
+                          <option value="26.1.2">Minecraft 26.1.2 (Vanilla)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- SUB-TAB CONTENT: Resource Management -->
+                  <div id="settings-content-resources" class="settings-pane hidden space-y-4">
+                    <div>
+                      <h3 class="font-unbounded font-black text-xl text-white select-none">Управление ресурсами</h3>
+                      <p class="text-xs text-[#a99c92] mt-1 select-none">Управляйте папками и загруженными файлами игры.</p>
+                    </div>
+                    <div class="bg-[#251d18]/40 border border-[#d4a373]/20 rounded-[20px] p-5 space-y-4">
+                      <!-- Game directory -->
+                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#d4a373]/20">
+                        <div>
+                          <h5 class="text-xs font-bold text-white font-unbounded">Путь к файлам игры</h5>
+                          <p class="text-[10px] text-[#a99c92] mt-0.5">Место, куда лаунчер скачивает файлы клиента</p>
+                        </div>
+                        <div class="flex w-full sm:w-auto space-x-2">
+                          <input type="text" id="settings-mc-path" readonly value="C:\Users\zsato\.cozyhouse\minecraft" class="px-3 py-1.5 bg-[#0e0a08] border border-[#31251e] text-[#a99c92] text-[10px] w-full sm:w-[200px] outline-none">
+                          <button id="settings-mc-path-browse" class="bg-[#d4a373]/20 border border-[#d4a373]/40 hover:bg-[#d4a373]/30 text-white font-semibold py-1.5 px-3 rounded-[8px] text-[10px] transition-colors shrink-0 cursor-pointer">Обзор</button>
+                        </div>
+                      </div>
+                      <!-- Clean assets -->
+                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <h5 class="text-xs font-bold text-white font-unbounded">Очистить кэш клиента</h5>
+                          <p class="text-[10px] text-[#a99c92] mt-0.5">Удаление временных файлов для устранения лагов</p>
+                        </div>
+                        <button id="clear-cache-btn" class="bg-red-950/40 border border-red-800/40 hover:bg-red-900/40 text-red-300 font-semibold py-2 px-4 rounded-[10px] text-xs transition-colors shrink-0 cursor-pointer w-full sm:w-auto">
+                          Очистить кэш
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Action Footer -->
+                <div class="pt-4 shrink-0 flex items-center justify-end space-x-3 border-t border-[#d4a373]/20 bg-[#251d18]/20">
+                  <button id="reset-settings-btn" class="text-xs font-bold text-[#a99c92] hover:text-white px-4 py-2.5 rounded-[12px] transition-colors cursor-pointer select-none">
+                    Сбросить
+                  </button>
+                  <button id="save-settings-btn" class="bg-[#d4a373] hover:bg-[#c69362] text-xs font-bold text-white px-5 py-2.5 rounded-[12px] shadow-[0_4px_16px_rgba(212,163,115,0.3)] transition-all cursor-pointer select-none">
+                    Сохранить изменения
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+        </div>
+
+      </main>
+
+      <!-- MOBILE BOTTOM NAVIGATION -->
+      <nav class="lg:hidden flex justify-around items-center h-16 bg-[#1a1411]/85 backdrop-blur-xl border border-[#d4a373]/25 rounded-[20px] px-3 shadow-[0_-4px_24px_rgba(0,0,0,0.3)] shrink-0 z-20">
+        <!-- Account -->
+        <button data-tab="account" class="tab-btn-mobile flex flex-col items-center justify-center text-[#a99c92]">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span class="text-[8px] font-bold uppercase tracking-wider">аккаунт</span>
+        </button>
+
+        <!-- Play -->
+        <button data-tab="play" class="tab-btn-mobile flex flex-col items-center justify-center text-[#d4a373]">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.07 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z" />
+          </svg>
+          <span class="text-[8px] font-bold uppercase tracking-wider">играть</span>
+        </button>
+
+        <!-- Mods -->
+        <button data-tab="mods" class="tab-btn-mobile flex flex-col items-center justify-center text-[#736a8e]">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2" />
+          </svg>
+          <span class="text-[8px] font-bold uppercase tracking-wider">моды</span>
+        </button>
+
+        <!-- Map -->
+        <button data-tab="map" class="tab-btn-mobile flex flex-col items-center justify-center text-[#a99c92]">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4M9 7l6 3" />
+          </svg>
+          <span class="text-[8px] font-bold uppercase tracking-wider">карта</span>
+        </button>
+
+        <!-- Settings -->
+        <button data-tab="settings" class="tab-btn-mobile flex flex-col items-center justify-center text-[#a99c92]">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          </svg>
+          <span class="text-[8px] font-bold uppercase tracking-wider">настройки</span>
+        </button>
+
+        <!-- Exit (Log out) -->
+        <button id="logout-btn-mobile" class="tab-btn-mobile flex flex-col items-center justify-center text-[#a99c92] active:text-[#e76f51]">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span class="text-[8px] font-bold uppercase tracking-wider">выйти</span>
+        </button>
+      </nav>
+
+    </div>
+
+  </div>
+
+  <!-- Global Floating Item Tooltip -->
+  <div id="global-item-tooltip" class="fixed hidden pointer-events-none bg-[#120e0c]/95 border border-[#d4a373]/30 p-3.5 rounded-[14px] shadow-[0_4px_24px_rgba(0,0,0,0.6)] backdrop-blur-md z-[100] max-w-[240px] text-xs font-outfit select-none">
+    <span id="tooltip-name" class="font-unbounded font-black text-white text-[11px] block">Название</span>
+    <span id="tooltip-type" class="text-[9px] font-bold text-[#d4a373] uppercase tracking-wider block mt-0.5">Тип предмета</span>
+    <div id="tooltip-desc" class="text-[#a99c92] text-[10px] leading-relaxed border-t border-[#d4a373]/20 pt-1.5 mt-1.5">Описание</div>
+  </div>
+
+  <!-- Cozy Logout Confirmation Modal -->
+  <div id="logout-confirm-modal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4">
+    <!-- Overlay -->
+    <div id="logout-modal-overlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    
+    <!-- Modal Card -->
+    <div class="relative w-full max-w-[380px] bg-[#1a1411]/95 border border-[#d4a373]/30 rounded-[28px] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.6)] text-center select-none z-10 animate-[fadeIn_0.3s_ease-out] no-drag-region">
+      <!-- Icon/Header -->
+      <div class="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 mx-auto mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+      </div>
+      
+      <h3 class="font-unbounded font-black text-lg text-white mb-2 font-unbounded">Выйти из аккаунта?</h3>
+      <p class="text-xs text-[#a99c92] leading-relaxed mb-6">Вы уверены, что хотите выйти из своей учетной записи и вернуться на экран авторизации?</p>
+      
+      <!-- Actions -->
+      <div class="flex items-center space-x-3">
+        <button id="logout-cancel-btn" class="flex-grow py-3 px-4 bg-[#251d18]/50 border border-[#d4a373]/20 hover:bg-[#251d18] text-[#a99c92] hover:text-white rounded-[14px] text-xs font-bold transition-all cursor-pointer">
+          Отмена
+        </button>
+        <button id="logout-confirm-btn" class="flex-grow py-3 px-4 bg-[#e63946] hover:bg-[#d62839] text-white rounded-[14px] text-xs font-bold shadow-[0_4px_16px_rgba(230,57,70,0.3)] transition-all cursor-pointer">
+          Да, выйти
+        </button>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- End of #app-window -->
+
+  <!-- Web Component script -->
+  <script src="./cozy-login.js"></script>
+
+  <!-- Application Logic JS -->
+  <script>
+    // Elements
+    const loginPage = document.getElementById('login-page');
+    const dashboardPage = document.getElementById('dashboard-page');
+    const loginComponent = document.querySelector('cozy-login');
+
+    const userDisplayNames = document.querySelectorAll('.user-display-name');
+    const userDisplayAvatars = document.querySelectorAll('.user-display-avatar');
+    
+    const accBigAvatar = document.getElementById('skin-body-preview');
+    const invCharBody = document.getElementById('inventory-character-body');
+    const accUsernameDisplay = document.querySelector('.acc-username-display');
+    const activeSkinLabel = document.getElementById('active-skin-label');
+    
+    const skinSearchInput = document.getElementById('skin-search-input');
+    const searchSkinBtn = document.getElementById('search-skin-btn');
+    const savedSkinsGrid = document.getElementById('saved-skins-grid');
+    
+    const logoutBtn = document.getElementById('logout-btn');
+    const logoutBtnMobile = document.getElementById('logout-btn-mobile');
+    
+    const liveClock = document.getElementById('live-clock');
+    
+    const playControllerContainer = document.getElementById('play-controller-container');
+    const playBtn = document.getElementById('dashboard-play-btn');
+    const syncBtn = document.getElementById('dashboard-sync-btn');
+    
+    const mainGrid = document.getElementById('inv-grid-main');
+    const hotbarGrid = document.getElementById('inv-grid-hotbar');
+
+    // Tooltip Elements
+    const globalTooltip = document.getElementById('global-item-tooltip');
+    const tooltipName = document.getElementById('tooltip-name');
+    const tooltipType = document.getElementById('tooltip-type');
+    const tooltipDesc = document.getElementById('tooltip-desc');
+
+    // Mod Lists elements
+    const modsListEl = document.getElementById('mods-items-list');
+    const shadersListEl = document.getElementById('mods-shaders-list');
+    const resourcepacksListEl = document.getElementById('mods-resourcepacks-list');
+    const addModsBtnText = document.getElementById('add-mods-btn-text');
+
+    // Settings elements
+    const settingsFullscreen = document.getElementById('settings-fullscreen');
+    const settingsWidth = document.getElementById('settings-width');
+    const settingsHeight = document.getElementById('settings-height');
+    const settingsRamSlider = document.getElementById('settings-ram-slider');
+    const settingsRamVal = document.getElementById('settings-ram-val');
+    const clearCacheBtn = document.getElementById('clear-cache-btn');
+    const saveSettingsBtn = document.getElementById('save-settings-btn');
+    const resetSettingsBtn = document.getElementById('reset-settings-btn');
+
+    // Global Settings State
+    let savedSettings = {
+      width: '854',
+      height: '480',
+      fullscreen: false,
+      ram: '4096',
+      mcPath: 'C:\\Users\\zsato\\.cozyhouse\\minecraft',
+      javaPath: 'java',
+      theme: 'cozy-beige',
+      lang: 'ru'
+    };
+
+    let draftSettings = { ...savedSettings };
+    let revertUnsavedSettings = () => {};
+
+    // Interactive Data Structures
+    const modsData = [
+      { id: 'mod-3dskin', name: '3D Skin Layers', desc: 'Делает второй слой объёмными', active: true, color: 'from-amber-600 to-amber-800', initial: '3D' },
+      { id: 'mod-camera', name: 'Camera Overhaul', desc: 'Делает игровой процесс и перемещение более приятными за счёт...', active: true, color: 'from-sky-500 to-blue-600', initial: 'CO' },
+      { id: 'mod-litematica', name: 'Litematica', desc: 'A client-side schematic mod with extra features for creative mode work', active: true, color: 'from-indigo-500 to-purple-600', initial: 'LT' },
+      { id: 'mod-crosshair', name: 'Dynamic Crosshair', desc: 'Мод, который скрывает или меняет прицел в зависимости от контекста', active: true, color: 'from-slate-600 to-slate-800', initial: 'DC' },
+      { id: 'mod-blur', name: 'Blur+', desc: 'Делает второй слой объёмными', active: true, color: 'from-emerald-500 to-teal-600', initial: 'B+' },
+      { id: 'mod-female', name: 'Female Gender Mod', desc: 'Добавляет дополнительные возможности настройки модели игрока...', active: true, color: 'from-rose-500 to-pink-600', initial: 'FG' },
+      { id: 'mod-chatanim', name: 'Chat animation', desc: 'Сообщения в чате отображаются с плавной анимацией.', active: true, color: 'from-violet-500 to-indigo-600', initial: 'CA' },
+      { id: 'mod-invmove', name: 'InvMove', desc: 'Добавляет возможность перемещаться, находясь в инвентаре', active: true, color: 'from-green-600 to-emerald-800', initial: 'IM' },
+      { id: 'mod-appleskin', name: 'AppleSkin', desc: 'Улучшения интерфейса, связанные с едой и голодом', active: true, color: 'from-red-500 to-rose-600', initial: 'AS' },
+      { id: 'mod-invprofiles', name: 'Inventory Profiles Next', desc: 'Возьмите под контроль свой инвентарь. Сортировка. Перемещени...', active: true, color: 'from-cyan-500 to-blue-600', initial: 'IP' }
+    ];
+
+    const shadersData = [
+      { id: 'shader-bsl', name: 'BSL Shaders', desc: 'Шейдерпак для Minecraft: Java Edition. Он яркий, красочный и необычный.', active: true, color: 'from-indigo-500 to-purple-600', initial: 'BSL' },
+      { id: 'shader-photon', name: 'Photon Shader', desc: 'Шейдер-пак, ориентированный на игровой процесс, в полуреалистичном стиле.', active: true, color: 'from-amber-500 to-orange-600', initial: 'PH' },
+      { id: 'shader-complementary', name: 'Complementary Shaders', desc: 'Сохранение элементов Minecraft с исключительным качеством, детализацией.', active: true, color: 'from-purple-500 to-fuchsia-600', initial: 'CP' },
+      { id: 'shader-kappa', name: 'Kappa Shader', desc: 'Высококачественный реалистичный, но в то же время несколько стилизованный.', active: false, color: 'from-sky-500 to-emerald-500', initial: 'KP' },
+      { id: 'shader-bliss', name: 'Bliss Shaders', desc: 'Высокопроизводительный шейдерпак в стиле фэнтези с улучшенным туманом.', active: false, color: 'from-teal-500 to-emerald-600', initial: 'BL' },
+      { id: 'shader-blissdh', name: 'Bliss Shaders DH', desc: 'Делает второй слой облаков объёмными и совместим с Distant Horizons.', active: false, color: 'from-rose-500 to-pink-600', initial: 'DH' }
+    ];
+
+    const resourcePacksData = [
+      { id: 'pack-animations', name: 'Fresh Animations', desc: 'Сделайте свою игру похожей на трейлеры! Динамичные анимированны...', active: true, color: 'from-green-500 to-emerald-600', initial: 'FA' },
+      { id: 'pack-enchants', name: 'Even Better Enchants', desc: 'Уникальные текстуры для зачарованных книг!', active: true, color: 'from-purple-600 to-indigo-700', initial: 'EB' },
+      { id: 'pack-moves', name: 'Fresh Moves', desc: 'Добавляет эффектные анимации для игрока. Совместим с анимациями из д...', active: true, color: 'from-orange-500 to-amber-600', initial: 'FM' },
+      { id: 'pack-faithful', name: 'Faithful 64x', desc: 'Ещё более детализированная игра с текстурами в четыре раза более высо...', active: true, color: 'from-pink-500 to-rose-600', initial: 'FF' },
+      { id: 'pack-darkmode', name: 'Default Dark Mode', desc: '🌙 Пакет ресурсов «Тёмный режим» для Minecraft: Java Edition', active: true, color: 'from-slate-700 to-slate-800', initial: 'DM' },
+      { id: 'pack-crops', name: 'Fancy Crops', desc: 'Мой взгляд на красивое фермерство, совместимое с модами', active: true, color: 'from-yellow-600 to-amber-700', initial: 'FC' }
+    ];
+
+    // Inventory items
+    const inventoryItems = {
+      0: { name: 'Ведро с розовым аксолотлем', emoji: '🪣', count: 1, type: 'Водный питомец', desc: 'Милый розовый аксолотль в ведре с водой. Не дайте ему высохнуть!' },
+      1: { name: 'Дубовая дверь', emoji: '🚪', count: 2, type: 'Строительный блок', desc: 'Прочная деревянная дверь для защиты вашего жилища от зомби.' },
+      2: { name: 'Сахарный тростник', emoji: '🎋', count: 64, type: 'Материал', desc: 'Используется для создания бумаги и сахара. Растёт на песке и земле рядом с водой.' },
+      3: { name: 'Стойка для брони', emoji: '🧍', count: 5, type: 'Декоративный блок', desc: 'Служит для хранения и демонстрации элементов брони.' },
+      
+      27: { name: 'Незеритовый меч', emoji: '⚔️', count: 1, type: 'Оружие ближнего боя', desc: 'Урон: +8<br>Прочность: 2031/2031<br><br><span class="text-[#faedcd] font-bold">Наложения:</span><br>• Острота V<br>• Добыча III<br>• Прочность III' },
+      28: { name: 'Незеритовая кирка', emoji: '⛏️', count: 1, type: 'Инструмент', desc: 'Скорость добычи: +9<br>Прочность: 1980/2031<br><br><span class="text-[#faedcd] font-bold">Наложения:</span><br>• Эффективность V<br>• Шёлковое касание<br>• Прочность III' },
+      29: { name: 'Незеритовый топор', emoji: '🪓', count: 1, type: 'Инструмент / Оружие', desc: 'Урон: +10<br>Прочность: 2031/2031<br><br><span class="text-[#faedcd] font-bold">Наложения:</span><br>• Эффективность V<br>• Прочность III' },
+      30: { name: 'Незеритовая лопата', emoji: '🥄', count: 1, type: 'Инструмент', desc: 'Скорость копания: +9<br>Прочность: 2031/2031<br><br><span class="text-[#faedcd] font-bold">Наложения:</span><br>• Эффективность IV' },
+      31: { name: 'Жареная говядина', emoji: '🥩', count: 64, type: 'Еда', desc: 'Насыщение: +8 единиц сытости. Восстанавливает здоровье при полной сытости.' }
+    };
+
+    // Initialize application view
+    const initApp = () => {
+      renderInventory();
+      renderCardsList(modsData, modsListEl);
+      renderCardsList(shadersData, shadersListEl);
+      renderCardsList(resourcePacksData, resourcepacksListEl);
+      setupSettingsHandlers();
+    };
+
+    // Render inventory grids
+    const renderInventory = () => {
+      mainGrid.innerHTML = '';
+      hotbarGrid.innerHTML = '';
+      
+      // Main Inventory (27 slots)
+      for (let i = 0; i < 27; i++) {
+        mainGrid.appendChild(createSlot(i, inventoryItems[i]));
+      }
+
+      // Hotbar (9 slots)
+      for (let i = 0; i < 9; i++) {
+        hotbarGrid.appendChild(createSlot(27 + i, inventoryItems[27 + i]));
+      }
+    };
+
+    const createSlot = (index, item) => {
+      const slot = document.createElement('div');
+      slot.className = 'w-10 h-10 sm:w-11 sm:h-11 bg-[#0e0a08] border border-[#31251e] hover:border-[#d4a373] rounded-[8px] flex items-center justify-center relative cursor-pointer group transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]';
+      slot.setAttribute('data-slot-index', index);
+      
+      if (item) {
+        slot.innerHTML = `
+          <span class="text-xl sm:text-2xl select-none transform group-hover:scale-110 transition-transform">${item.emoji}</span>
+          ${item.count > 1 ? `<span class="text-[9px] sm:text-[10px] font-bold font-unbounded text-white absolute bottom-1 right-1.5 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">${item.count}</span>` : ''}
+        `;
+        
+        slot.addEventListener('mouseenter', (e) => showItemTooltip(e, item));
+        slot.addEventListener('mouseleave', hideItemTooltip);
+        slot.addEventListener('mousemove', moveItemTooltip);
+      }
+      
+      return slot;
+    };
+
+    // Item Tooltip Handlers
+    const showItemTooltip = (e, item) => {
+      tooltipName.textContent = item.name;
+      tooltipType.textContent = item.type;
+      tooltipDesc.innerHTML = item.desc;
+      
+      globalTooltip.classList.remove('hidden');
+      moveItemTooltip(e);
+    };
+
+    const moveItemTooltip = (e) => {
+      const x = e.clientX + 14;
+      const y = e.clientY - 24;
+      
+      // Boundary check to keep tooltip inside viewport
+      const width = globalTooltip.offsetWidth;
+      const height = globalTooltip.offsetHeight;
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+
+      let finalX = x;
+      let finalY = y;
+
+      if (x + width > screenWidth) {
+        finalX = e.clientX - width - 14;
+      }
+      if (y + height > screenHeight) {
+        finalY = screenHeight - height - 10;
+      }
+      if (finalY < 0) {
+        finalY = 10;
+      }
+
+      globalTooltip.style.left = `${finalX}px`;
+      globalTooltip.style.top = `${finalY}px`;
+    };
+
+    const hideItemTooltip = () => {
+      globalTooltip.classList.add('hidden');
+    };
+
+    // Render mod cards list
+    const renderCardsList = (data, container) => {
+      container.innerHTML = '';
+      data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'bg-[#171427]/60 border border-[#26213b]/60 p-4 rounded-[20px] flex items-center justify-between hover:border-[#4c4270]/60 transition-all duration-300';
+        card.innerHTML = `
+          <div class="flex items-center space-x-3.5 min-w-0 flex-grow">
+            <div class="w-11 h-11 rounded-[12px] bg-gradient-to-br ${item.color} border border-white/5 flex-shrink-0 flex items-center justify-center font-unbounded font-black text-xs text-white select-none">${item.initial}</div>
+            <div class="min-w-0">
+              <h4 class="text-white text-xs sm:text-sm font-bold font-unbounded truncate select-none">${item.name}</h4>
+              <p class="text-[10px] sm:text-[11px] text-[#8b86a4] mt-0.5 truncate select-none" title="${item.desc}">${item.desc}</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer select-none ml-4 flex-shrink-0">
+            <input type="checkbox" id="${item.id}" ${item.active ? 'checked' : ''} class="sr-only peer">
+            <div class="w-9 h-5 bg-[#25203b] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-[#8b86a4] peer-checked:after:bg-white after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-[#22c55e] transition-colors duration-300"></div>
+          </label>
+        `;
+        
+        // Add Toggle change listener
+        const toggle = card.querySelector('input');
+        toggle.addEventListener('change', (e) => {
+          item.active = e.target.checked;
+          const status = item.active ? 'активирован' : 'деактивирован';
+          showNotification(`${item.name} ${status}!`);
+        });
+
+        container.appendChild(card);
+      });
+    };
+
+    // 1. Listen for Successful Login from Web Component
+    loginComponent.addEventListener('login-success', (e) => {
+      const { nickname, uuid, accessToken, clientToken, balance_coins, skin_url, rank } = e.detail;
+      // Store globally so map/other features can check privilege
+      window._currentUser = { nickname, uuid, rank: rank || '' };
+      
+      // Save session info to localStorage for subsequent validation or launch
+      localStorage.setItem('nickname', nickname);
+      localStorage.setItem('uuid', uuid);
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('clientToken', clientToken);
+
+      // Update UI elements with nickname
+      userDisplayNames.forEach(el => el.textContent = nickname);
+      accUsernameDisplay.textContent = nickname;
+      activeSkinLabel.textContent = nickname;
+      
+      // Update balance
+      const balanceVal = balance_coins !== undefined ? balance_coins : 0;
+      const balanceEl = document.getElementById('acc-balance-display');
+      if (balanceEl) balanceEl.textContent = `${balanceVal} АР`;
+
+      // Update skin previews
+      const cachedSkinUuid = localStorage.getItem('cachedSkinUuid');
+      const cachedSkin     = localStorage.getItem('cachedSkinUrl');
+      const bestSkin       = skin_url || (cachedSkinUuid === uuid ? cachedSkin : null);
+      if (bestSkin) {
+        if (skin_url) {
+          localStorage.setItem('cachedSkinUrl', skin_url);
+          localStorage.setItem('cachedSkinUuid', uuid);
+        }
+        const slim = !skin_url ? localStorage.getItem('cachedSkinSlim') === 'true' : undefined;
+        applySkin(bestSkin, slim);
+      } else {
+        userDisplayAvatars.forEach(el => el.src = `https://mc-heads.net/avatar/${nickname}.png`);
+        accBigAvatar.src = `https://mc-heads.net/body/${nickname}.png`;
+        if (invCharBody) invCharBody.src = `https://mc-heads.net/body/${nickname}.png`;
+      }
+      
+      // Transition from Login to Dashboard
+      loginPage.classList.remove('opacity-100', 'scale-100');
+      loginPage.classList.add('opacity-0', 'scale-95');
+      
+      setTimeout(() => {
+        loginPage.classList.add('hidden');
+        dashboardPage.classList.remove('hidden');
+        dashboardPage.offsetHeight; // force reflow
+        dashboardPage.classList.remove('opacity-0', 'scale-95');
+        dashboardPage.classList.add('opacity-100', 'scale-100');
+      }, 500);
+    });
+
+    // 2. Handle Logout
+    const handleLogout = async () => {
+      const accessToken = localStorage.getItem('accessToken');
+      
+      // Clear localStorage session info
+      localStorage.removeItem('nickname');
+      localStorage.removeItem('uuid');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('clientToken');
+      localStorage.removeItem('cachedSkinUrl');
+      localStorage.removeItem('cachedSkinUuid');
+
+      dashboardPage.classList.remove('opacity-100', 'scale-100');
+      dashboardPage.classList.add('opacity-0', 'scale-95');
+      
+      // Call background logout endpoint to revoke session in DB
+      if (accessToken) {
+        try {
+          fetch('https://cozy-house-auth.8pfw45jj9c.workers.dev/api/logout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ accessToken })
+          });
+        } catch (e) {
+          console.error('Logout request failed:', e);
+        }
+      }
+
+      setTimeout(() => {
+        dashboardPage.classList.add('hidden');
+        loginPage.classList.remove('hidden');
+        loginComponent.isRegisterMode = false; // Reset to login mode
+        loginComponent.render(); 
+        
+        loginPage.offsetHeight;
+        loginPage.classList.remove('opacity-0', 'scale-95');
+        loginPage.classList.add('opacity-100', 'scale-100');
+      }, 500);
+    };
+
+    // Logout Confirmation Modal controls
+    const logoutModal = document.getElementById('logout-confirm-modal');
+    const cancelLogoutBtn = document.getElementById('logout-cancel-btn');
+    const confirmLogoutBtn = document.getElementById('logout-confirm-btn');
+    const logoutModalOverlay = document.getElementById('logout-modal-overlay');
+
+    const showLogoutModal = () => {
+      logoutModal.classList.remove('hidden');
+      logoutModal.classList.add('flex');
+    };
+
+    const hideLogoutModal = () => {
+      logoutModal.classList.remove('flex');
+      logoutModal.classList.add('hidden');
+    };
+
+    logoutBtn.addEventListener('click', showLogoutModal);
+    logoutBtnMobile.addEventListener('click', showLogoutModal);
+    cancelLogoutBtn.addEventListener('click', hideLogoutModal);
+    logoutModalOverlay.addEventListener('click', hideLogoutModal);
+    
+    confirmLogoutBtn.addEventListener('click', () => {
+      hideLogoutModal();
+      handleLogout();
+    });
+
+    // 3. Tab Navigation Logic (Desktop & Mobile)
+    const tabButtonsDesktop = document.querySelectorAll('aside .tab-btn');
+    const tabButtonsMobile = document.querySelectorAll('nav.lg\\:hidden .tab-btn-mobile');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    const switchTab = (tabName) => {
+      // Desktop nav button active states
+      tabButtonsDesktop.forEach(btn => {
+        const indicator = btn.querySelector('.active-indicator');
+        if (btn.getAttribute('data-tab') === tabName) {
+          btn.classList.add('text-[#d4a373]', 'bg-[#2a201b]/50');
+          btn.classList.remove('text-[#a99c92]', 'hover:bg-[#2a201b]/50');
+          if (indicator) indicator.classList.replace('opacity-0', 'opacity-100');
+        } else {
+          btn.classList.remove('text-[#d4a373]', 'bg-[#2a201b]/50');
+          btn.classList.add('text-[#a99c92]');
+          if (indicator) indicator.classList.replace('opacity-100', 'opacity-0');
+        }
+      });
+
+      // Mobile nav button active states
+      tabButtonsMobile.forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabName) {
+          btn.classList.add('text-[#d4a373]');
+          btn.classList.remove('text-[#a99c92]');
+        } else {
+          btn.classList.remove('text-[#d4a373]');
+          btn.classList.add('text-[#a99c92]');
+        }
+      });
+
+      // Revert settings if switching away from settings tab
+      if (tabName !== 'settings') {
+        revertUnsavedSettings();
+      }
+
+      // Show selected tab pane
+      tabPanes.forEach(pane => {
+        if (pane.id === `tab-content-${tabName}`) {
+          pane.classList.remove('hidden');
+          pane.classList.remove('slide-in');
+          void pane.offsetWidth; // force reflow
+          pane.classList.add('slide-in');
+        } else {
+          pane.classList.add('hidden');
+        }
+      });
+    };
+
+    tabButtonsDesktop.forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+    });
+
+    tabButtonsMobile.forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+    });
+
+    // 4. Mods sub-tab navigation
+    const subtabButtons = document.querySelectorAll('.subtab-btn');
+    const subtabPanes = document.querySelectorAll('.subtab-pane');
+
+    subtabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const subtabId = btn.getAttribute('data-subtab');
+        
+        subtabButtons.forEach(b => {
+          if (b === btn) {
+            b.classList.add('bg-[#d4a373]/20', 'text-[#d4a373]', 'active');
+            b.classList.remove('text-[#a99c92]', 'hover:text-[#d4a373]', 'hover:bg-[#2a201b]/30');
+          } else {
+            b.classList.remove('bg-[#d4a373]/20', 'text-[#d4a373]', 'active');
+            b.classList.add('text-[#a99c92]', 'hover:text-[#d4a373]', 'hover:bg-[#2a201b]/30');
+          }
+        });
+
+        subtabPanes.forEach(pane => {
+          if (pane.id === `subtab-content-${subtabId}`) {
+            pane.classList.remove('hidden');
+            pane.classList.remove('slide-in');
+            void pane.offsetWidth;
+            pane.classList.add('slide-in');
+          } else {
+            pane.classList.add('hidden');
+          }
+        });
+
+        // Update footer button text dynamically
+        if (subtabId === 'mods-items') {
+          addModsBtnText.textContent = 'Добавить моды';
+        } else if (subtabId === 'mods-shaders') {
+          addModsBtnText.textContent = 'Добавить шейдеры';
+        } else if (subtabId === 'mods-resourcepacks') {
+          addModsBtnText.textContent = 'Добавить ресурс-паки';
+        }
+      });
+    });
+
+    // 5. Settings sub-tab navigation
+    const settingsSubtabButtons = document.querySelectorAll('.settings-subtab-btn');
+    const settingsPanes = document.querySelectorAll('.settings-pane');
+
+    settingsSubtabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const settingsSubtabId = btn.getAttribute('data-settings-subtab');
+        
+        settingsSubtabButtons.forEach(b => {
+          if (b === btn) {
+            b.classList.add('bg-[#d4a373]/20', 'text-[#d4a373]');
+            b.classList.remove('text-[#a99c92]', 'hover:text-[#d4a373]', 'hover:bg-[#2a201b]/30');
+          } else {
+            b.classList.remove('bg-[#d4a373]/20', 'text-[#d4a373]');
+            b.classList.add('text-[#a99c92]', 'hover:text-[#d4a373]', 'hover:bg-[#2a201b]/30');
+          }
+        });
+
+        settingsPanes.forEach(pane => {
+          const expectedId = settingsSubtabId.replace('settings-', 'settings-content-');
+          if (pane.id === expectedId) {
+            pane.classList.remove('hidden');
+            pane.classList.remove('slide-in');
+            void pane.offsetWidth;
+            pane.classList.add('slide-in');
+          } else {
+            pane.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    // 6. Settings Inputs and Handlers
+    const setupSettingsHandlers = () => {
+      const themeSelect = document.getElementById('settings-theme-select');
+      const langSelect = document.getElementById('settings-lang-select');
+      const pathInput = document.getElementById('settings-mc-path');
+
+      // Theme applying helper
+      const applyTheme = (theme) => {
+        document.body.classList.remove('theme-nether-red', 'theme-ender-blue');
+        if (theme === 'nether-red') {
+          document.body.classList.add('theme-nether-red');
+        } else if (theme === 'ender-blue') {
+          document.body.classList.add('theme-ender-blue');
+        }
+      };
+
+      // Language applying helper
+      const applyLanguage = (lang) => {
+        const isRu = lang === 'ru';
+        
+        // Update login component language
+        if (loginComponent) {
+          loginComponent.setAttribute('lang', lang);
+        }
+        
+        // Dynamic DOM selectors translations
+        document.querySelectorAll('[data-tab]').forEach(btn => {
+          const tab = btn.getAttribute('data-tab');
+          const span = btn.querySelector('span');
+          if (!span) return;
+          if (tab === 'play') span.textContent = isRu ? 'Главная' : 'Main';
+          else if (tab === 'mods') span.textContent = isRu ? 'Моды' : 'Mods';
+          else if (tab === 'account') span.textContent = isRu ? 'Аккаунт' : 'Account';
+          else if (tab === 'map') span.textContent = isRu ? 'Карта' : 'Map';
+          else if (tab === 'settings') span.textContent = isRu ? 'Настройки' : 'Settings';
+        });
+
+        const logoutSpans = document.querySelectorAll('#logout-btn span, #logout-btn-mobile span');
+        logoutSpans.forEach(span => {
+          span.textContent = isRu ? 'Выйти' : 'Log Out';
+        });
+
+        const playBtnText = document.querySelector('#dashboard-play-btn span');
+        if (playBtnText && !isLaunching) {
+          playBtnText.textContent = isRu ? 'ИГРАТЬ' : 'PLAY';
+        }
+        
+        const onlineLabel = document.getElementById('server-online-label');
+        if (onlineLabel) {
+          onlineLabel.textContent = isRu ? 'онлайн сервера' : 'server online';
+        }
+
+        const newsHeader = document.getElementById('news-title-label');
+        if (newsHeader) {
+          newsHeader.textContent = isRu ? 'Новости и акции' : 'News & Announcements';
+        }
+
+        document.querySelectorAll('[data-settings-subtab]').forEach(btn => {
+          const subtab = btn.getAttribute('data-settings-subtab');
+          const span = btn.querySelector('span');
+          if (!span) return;
+          if (subtab === 'settings-appearance') span.textContent = isRu ? 'Внешность' : 'Appearance';
+          else if (subtab === 'settings-window') span.textContent = isRu ? 'Окно' : 'Window';
+          else if (subtab === 'settings-java') span.textContent = isRu ? 'Java и память' : 'Java & RAM';
+          else if (subtab === 'settings-resources') span.textContent = isRu ? 'Ресурсы' : 'Resources';
+        });
+
+        const appearanceHeader = document.querySelector('#settings-content-appearance h3');
+        const appearanceDesc = document.querySelector('#settings-content-appearance p');
+        if (appearanceHeader) appearanceHeader.textContent = isRu ? 'Внешность' : 'Appearance';
+        if (appearanceDesc) appearanceDesc.textContent = isRu ? 'Настройте внешний вид клиента и лаунчера.' : 'Customize the appearance of the client and launcher.';
+
+        const windowHeader = document.querySelector('#settings-content-window h3');
+        const windowDesc = document.querySelector('#settings-content-window p');
+        if (windowHeader) windowHeader.textContent = isRu ? 'Настройки' : 'Settings';
+        if (windowDesc) windowDesc.textContent = isRu ? 'Здесь вы можете настроить клиент и лаунчер как вам удобно.' : 'Here you can configure the client and launcher as you wish.';
+
+        const javaHeader = document.querySelector('#settings-content-java h3');
+        const javaDesc = document.querySelector('#settings-content-java p');
+        if (javaHeader) javaHeader.textContent = isRu ? 'Java и память' : 'Java & Memory';
+        if (javaDesc) javaDesc.textContent = isRu ? 'Настройте пути выполнения Java и оперативную память для клиента.' : 'Configure Java runtime paths and allocated RAM.';
+
+        const resourcesHeader = document.querySelector('#settings-content-resources h3');
+        const resourcesDesc = document.querySelector('#settings-content-resources p');
+        if (resourcesHeader) resourcesHeader.textContent = isRu ? 'Управление ресурсами' : 'Resource Management';
+        if (resourcesDesc) resourcesDesc.textContent = isRu ? 'Управляйте папками и загруженными файлами игры.' : 'Manage directories and loaded game files.';
+
+        const labels = document.querySelectorAll('.settings-pane h5');
+        labels.forEach(label => {
+          const text = label.textContent.trim();
+          if (text === 'Полный экран' || text === 'Fullscreen') {
+            label.textContent = isRu ? 'Полный экран' : 'Fullscreen';
+            const p = label.nextElementSibling;
+            if (p) p.textContent = isRu ? 'Запускайте игру в полноэкранном режиме (с помощью options.txt).' : 'Launch the game in fullscreen mode (via options.txt).';
+          } else if (text === 'Ширина' || text === 'Width') {
+            label.textContent = isRu ? 'Ширина' : 'Width';
+            const p = label.nextElementSibling;
+            if (p) p.textContent = isRu ? 'Ширина игрового окна при запуске.' : 'Game window width on startup.';
+          } else if (text === 'Высота' || text === 'Height') {
+            label.textContent = isRu ? 'Высота' : 'Height';
+            const p = label.nextElementSibling;
+            if (p) p.textContent = isRu ? 'Высота игрового окна при запуске.' : 'Game window height on startup.';
+          } else if (text === 'Цветовая тема' || text === 'Color Theme' || text === 'Цветовая тема (по умолчанию)') {
+            label.textContent = isRu ? 'Цветовая тема' : 'Color Theme';
+            const p = label.nextElementSibling;
+            if (p) p.textContent = isRu ? 'Выберите цветовую схему оформления' : 'Select UI color theme';
+          } else if (text === 'Язык лаунчера' || text === 'Launcher Language') {
+            label.textContent = isRu ? 'Язык лаунчера' : 'Launcher Language';
+            const p = label.nextElementSibling;
+            if (p) p.textContent = isRu ? 'Выберите язык интерфейса' : 'Select interface language';
+          } else if (text === 'Выделение оперативной памяти' || text === 'RAM Allocation') {
+            label.textContent = isRu ? 'Выделение оперативной памяти' : 'RAM Allocation';
+            const p = label.nextElementSibling;
+            if (p) p.textContent = isRu ? 'Рекомендуется выделить половину доступной памяти' : 'It is recommended to allocate half of your available memory';
+          } else if (text === 'Версия Minecraft' || text === 'Minecraft Version') {
+            label.textContent = isRu ? 'Версия Minecraft' : 'Minecraft Version';
+            const p = label.nextElementSibling;
+            if (p) p.textContent = isRu ? 'Выберите загружаемый клиент' : 'Select client to load';
+          } else if (text === 'Путь к файлам игры' || text === 'Game Files Path') {
+            label.textContent = isRu ? 'Путь к файлам игры' : 'Game Files Path';
+            const p = label.nextElementSibling;
+            if (p) p.textContent = isRu ? 'Место, куда лаунчер скачивает файлы клиента' : 'Directory where launcher downloads client files';
+          } else if (text === 'Очистить кэш клиента' || text === 'Clear Client Cache') {
+            label.textContent = isRu ? 'Очистить кэш клиента' : 'Clear Client Cache';
+            const p = label.nextElementSibling;
+            if (p) p.textContent = isRu ? 'Удаление временных файлов для устранения лагов' : 'Delete temporary files to fix performance lags';
+          } else if (text === 'Путь к Java' || text === 'Java Path') {
+            label.textContent = isRu ? 'Путь к Java' : 'Java Path';
+            const p = label.nextElementSibling;
+            if (p) p.textContent = isRu ? 'Путь к исполняемому файлу javaw.exe (или java)' : 'Path to javaw.exe executable (or java)';
+          }
+        });
+
+        const resetBtn = document.getElementById('reset-settings-btn');
+        const saveBtn = document.getElementById('save-settings-btn');
+        if (resetBtn) resetBtn.textContent = isRu ? 'Сбросить' : 'Reset';
+        if (saveBtn) saveBtn.textContent = isRu ? 'Сохранить изменения' : 'Save Changes';
+
+        // Translate Java Error Modal
+        const javaModalHeader = document.querySelector('#java-error-modal h4');
+        const javaModalDesc = document.querySelector('#java-error-modal p');
+        const javaModalClose = document.getElementById('close-java-modal-btn');
+        const javaModalDownload = document.getElementById('download-java-modal-btn');
+        if (javaModalHeader) javaModalHeader.textContent = isRu ? 'Не найдена Java 21!' : 'Java 21 Not Found!';
+        if (javaModalDesc) javaModalDesc.textContent = isRu ?
+          'Minecraft 26.1.2 требует Java версии 21 или выше. Вы можете скачать официальный и безопасный установщик Java 21 (Adoptium Temurin) прямо сейчас.' :
+          'Minecraft 26.1.2 requires Java 21 or higher to run. You can download the official and secure Java 21 installer (Adoptium Temurin) right now.';
+        if (javaModalClose) javaModalClose.textContent = isRu ? 'Отмена' : 'Cancel';
+        if (javaModalDownload) javaModalDownload.textContent = isRu ? 'Скачать Java 21' : 'Download Java 21';
+
+        // Translate main page version tag
+        const versionTag = document.getElementById('main-version-tag');
+        if (versionTag) {
+          versionTag.textContent = isRu ? 'Версия: 26.1.2' : 'Version: 26.1.2';
+        }
+      };
+
+      // Fullscreen input locking helper based on draft state
+      const updateFullscreenLock = () => {
+        const isFS = draftSettings.fullscreen;
+        settingsWidth.disabled = isFS;
+        settingsHeight.disabled = isFS;
+        if (isFS) {
+          settingsWidth.classList.add('opacity-50', 'cursor-not-allowed');
+          settingsHeight.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+          settingsWidth.classList.remove('opacity-50', 'cursor-not-allowed');
+          settingsHeight.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      };
+
+      // Helper to sync UI controls with draftSettings state
+      const syncUIWithDraft = () => {
+        settingsWidth.value = draftSettings.width;
+        settingsHeight.value = draftSettings.height;
+        settingsFullscreen.checked = draftSettings.fullscreen;
+        settingsRamSlider.value = draftSettings.ram;
+        
+        const gb = (draftSettings.ram / 1024).toFixed(0);
+        settingsRamVal.textContent = `${draftSettings.ram} МБ (${gb} ГБ)`;
+        
+        if (pathInput) pathInput.value = draftSettings.mcPath;
+        const javaPathInput = document.getElementById('settings-java-path');
+        if (javaPathInput) javaPathInput.value = draftSettings.javaPath;
+        if (themeSelect) themeSelect.value = draftSettings.theme;
+        if (langSelect) langSelect.value = draftSettings.lang;
+
+        // Fetch and show active Java path dynamically
+        if (window.electronAPI && window.electronAPI.getActiveJavaPath) {
+          window.electronAPI.getActiveJavaPath(draftSettings.mcPath, draftSettings.javaPath).then((resolvedPath) => {
+            const detectedEl = document.getElementById('settings-java-detected-path');
+            if (detectedEl) {
+              const isRu = draftSettings.lang === 'ru';
+              if (resolvedPath === 'java') {
+                detectedEl.textContent = isRu ? 'Авто-поиск: системная java' : 'Auto-detect: system java';
+              } else {
+                detectedEl.textContent = (isRu ? 'Активный путь: ' : 'Active path: ') + resolvedPath;
+              }
+            }
+          });
+        }
+
+        applyTheme(draftSettings.theme);
+        applyLanguage(draftSettings.lang);
+        updateFullscreenLock();
+      };
+
+      // Global Revert Callback implementation
+      revertUnsavedSettings = () => {
+        draftSettings = { ...savedSettings };
+        syncUIWithDraft();
+      };
+
+      // Load Settings from LocalStorage
+      const loadSavedSettings = () => {
+        savedSettings.width = localStorage.getItem('settings_width') || '854';
+        savedSettings.height = localStorage.getItem('settings_height') || '480';
+        savedSettings.fullscreen = localStorage.getItem('settings_fullscreen') === 'true';
+        savedSettings.ram = localStorage.getItem('settings_ram') || '4096';
+        savedSettings.mcPath = localStorage.getItem('settings_mc_path') || 'C:\\Users\\zsato\\.cozyhouse\\minecraft';
+        savedSettings.javaPath = localStorage.getItem('settings_java_path') || 'java';
+        savedSettings.theme = localStorage.getItem('settings_theme') || 'cozy-beige';
+        savedSettings.lang = localStorage.getItem('settings_lang') || 'ru';
+        
+        draftSettings = { ...savedSettings };
+        syncUIWithDraft();
+      };
+
+      // Load initial settings
+      loadSavedSettings();
+
+      // DYNAMIC PREVIEW INPUT LISTENERS: Updates drafts & applies immediately in UI
+      themeSelect.addEventListener('change', (e) => {
+        draftSettings.theme = e.target.value;
+        applyTheme(draftSettings.theme);
+      });
+
+      langSelect.addEventListener('change', (e) => {
+        draftSettings.lang = e.target.value;
+        applyLanguage(draftSettings.lang);
+      });
+
+      settingsFullscreen.addEventListener('change', (e) => {
+        draftSettings.fullscreen = e.target.checked;
+        updateFullscreenLock();
+      });
+
+      settingsWidth.addEventListener('input', (e) => {
+        draftSettings.width = e.target.value;
+      });
+
+      settingsHeight.addEventListener('input', (e) => {
+        draftSettings.height = e.target.value;
+      });
+
+      settingsRamSlider.addEventListener('input', (e) => {
+        draftSettings.ram = e.target.value;
+        const gb = (draftSettings.ram / 1024).toFixed(0);
+        settingsRamVal.textContent = `${draftSettings.ram} МБ (${gb} ГБ)`;
+      });
+
+      // Reset Button - Resets ONLY the active section's draft settings to defaults
+      resetSettingsBtn.addEventListener('click', () => {
+        // Determine active sub-tab
+        const activeSubtabBtn = document.querySelector('.settings-subtab-btn.bg-\\[\\#d4a373\\]\\/20');
+        const activeSubtab = activeSubtabBtn ? activeSubtabBtn.getAttribute('data-settings-subtab') : 'settings-appearance';
+
+        if (activeSubtab === 'settings-appearance') {
+          draftSettings.theme = 'cozy-beige';
+          draftSettings.lang = 'ru';
+        } else if (activeSubtab === 'settings-window') {
+          draftSettings.fullscreen = false;
+          draftSettings.width = '854';
+          draftSettings.height = '480';
+        } else if (activeSubtab === 'settings-java') {
+          draftSettings.ram = '4096';
+          draftSettings.javaPath = 'java';
+        } else if (activeSubtab === 'settings-resources') {
+          draftSettings.mcPath = 'C:\\Users\\zsato\\.cozyhouse\\minecraft';
+        }
+
+        // Apply immediately to UI preview
+        syncUIWithDraft();
+
+        const isRu = draftSettings.lang === 'ru';
+        showNotification(isRu ? 'Раздел сброшен по умолчанию.' : 'Section reset to default.');
+      });
+
+      // Save Button - Commits draft to official savedSettings and saves to localStorage
+      saveSettingsBtn.addEventListener('click', () => {
+        savedSettings = { ...draftSettings };
+        
+        localStorage.setItem('settings_width', savedSettings.width);
+        localStorage.setItem('settings_height', savedSettings.height);
+        localStorage.setItem('settings_fullscreen', savedSettings.fullscreen);
+        localStorage.setItem('settings_ram', savedSettings.ram);
+        localStorage.setItem('settings_mc_path', savedSettings.mcPath);
+        localStorage.setItem('settings_java_path', savedSettings.javaPath);
+        localStorage.setItem('settings_theme', savedSettings.theme);
+        localStorage.setItem('settings_lang', savedSettings.lang);
+
+        const isRu = savedSettings.lang === 'ru';
+        showNotification(isRu ? 'Настройки успешно сохранены!' : 'Settings successfully saved!');
+      });
+
+      // Clear cache button
+      clearCacheBtn.addEventListener('click', () => {
+        const isRu = draftSettings.lang === 'ru';
+        clearCacheBtn.disabled = true;
+        clearCacheBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        clearCacheBtn.textContent = isRu ? 'Очистка...' : 'Clearing...';
+        
+        setTimeout(() => {
+          clearCacheBtn.disabled = false;
+          clearCacheBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          clearCacheBtn.textContent = isRu ? 'Очистить кэш' : 'Clear Cache';
+          showNotification(isRu ? 'Кэш клиента успешно очищен.' : 'Client cache cleared successfully.');
+        }, 1500);
+      });
+
+      // Folder Browse Button Dialog picker
+      const browseBtn = document.getElementById('settings-mc-path-browse');
+      if (browseBtn) {
+        browseBtn.addEventListener('click', async () => {
+          if (window.electronAPI && window.electronAPI.selectFolder) {
+            const folderPath = await window.electronAPI.selectFolder();
+            if (folderPath && pathInput) {
+              draftSettings.mcPath = folderPath;
+              pathInput.value = folderPath;
+            }
+          }
+        });
+      }
+
+      // Java Path Browse File Picker Dialog
+      const javaBrowseBtn = document.getElementById('settings-java-path-browse');
+      if (javaBrowseBtn) {
+        javaBrowseBtn.addEventListener('click', async () => {
+          if (window.electronAPI && window.electronAPI.selectFile) {
+            const isRu = draftSettings.lang === 'ru';
+            const javaInput = document.getElementById('settings-java-path');
+            const filters = [
+              { name: isRu ? 'Исполняемые файлы Java' : 'Java Executable Files', extensions: ['exe', 'jar'] },
+              { name: isRu ? 'Все файлы' : 'All Files', extensions: ['*'] }
+            ];
+            const filePath = await window.electronAPI.selectFile(filters);
+            if (filePath && javaInput) {
+              draftSettings.javaPath = filePath;
+              javaInput.value = filePath;
+            }
+          }
+        });
+      }
+    };
+
+    // 7. Active Saved Skins Interaction
+    savedSkinsGrid.addEventListener('click', async (e) => {
+      // Delete button
+      if (e.target.closest('.skin-delete-btn')) {
+        e.target.closest('.saved-skin-card')?.remove();
+        return;
+      }
+      const card = e.target.closest('.saved-skin-card');
+      if (!card || card.id === 'add-skin-card-btn') return;
+
+      await activateSkinCard(card);
+      const label = card.getAttribute('data-skin-name') || card.getAttribute('data-skin-id') || 'Скин';
+      showNotification(`Скин изменён на ${label}!`);
+    });
+
+    // Handle skin loading by nickname search
+    searchSkinBtn.addEventListener('click', () => {
+      const nick = skinSearchInput.value.trim();
+      if (nick.length < 3) {
+        showNotification('Введите корректный никнейм!');
+        return;
+      }
+
+      // Check if already in list
+      const existing = savedSkinsGrid.querySelector(`[data-skin-id="${nick}"]`);
+      if (existing) {
+        existing.click();
+        skinSearchInput.value = '';
+        return;
+      }
+
+      // Create new skin card element
+      const newCard = document.createElement('div');
+      newCard.setAttribute('data-skin-id', nick);
+      newCard.className = 'saved-skin-card shrink-0 w-[72px] h-[112px] border border-[#d4a373]/20 hover:border-[#d4a373]/45 bg-[#251d18]/60 rounded-[16px] p-1.5 flex flex-col items-center justify-center cursor-pointer transition-all select-none relative group overflow-hidden';
+      newCard.innerHTML = `
+        <button class="skin-delete-btn absolute top-1 right-1 w-4 h-4 bg-[#e63946]/90 hover:bg-[#e63946] rounded-full items-center justify-center hidden group-hover:flex z-20">
+          <svg class="w-2 h-2 text-white pointer-events-none" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+        <img class="h-[90px] object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,0.5)] transform group-hover:scale-105 transition-transform pointer-events-none"
+             src="https://mc-heads.net/body/${nick}.png" alt="${nick}"
+             onerror="this.onerror=null; this.src='https://mc-heads.net/body/Steve.png';">
+      `;
+
+      // Insert right after the add skin button
+      document.getElementById('add-skin-card-btn').after(newCard);
+
+      // Auto click new card
+      newCard.click();
+      skinSearchInput.value = '';
+    });
+
+    // 8. Live Clock Script
+    const updateClock = () => {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      
+      hours = hours % 12;
+      hours = hours ? hours : 12; 
+      const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+      
+      liveClock.textContent = `${hours}:${minutesStr} ${ampm}`;
+    };
+    
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // 9. Play Button / Client Launch Integration
+    let isLaunching = false;
+    let hasLaunched = false;
+    let hasJavaError = false;
+
+    const restorePlayButton = () => {
+      isLaunching = false;
+      hasLaunched = false;
+      hasJavaError = false;
+      playControllerContainer.innerHTML = `
+        <button id="dashboard-play-btn" class="w-full h-full bg-[#d4a373] hover:bg-[#c69362] transition-all duration-300 rounded-[18px] flex items-center justify-center select-none cursor-pointer shadow-[0_4px_24px_-2px_rgba(212,163,115,0.4)] hover:shadow-[0_6px_30px_rgba(212,163,115,0.55)] active:scale-[0.98] group relative">
+          <div class="absolute left-2 w-10 h-10 rounded-full bg-[#8f6848] flex items-center justify-center transition-all duration-300 group-hover:bg-[#725237] group-hover:scale-105">
+            <svg class="w-4 h-4 text-white fill-current group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+          <span class="text-white font-unbounded font-black text-base tracking-wider uppercase">ИГРАТЬ</span>
+        </button>
+      `;
+      document.getElementById('dashboard-play-btn').addEventListener('click', handleLaunch);
+    };
+
+    function handleLaunch() {
+      if (isLaunching) return;
+      isLaunching = true;
+      hasLaunched = false;
+      hasJavaError = false;
+      
+      // Render Cozy Styled Launch Progress Bar
+      playControllerContainer.innerHTML = `
+        <div class="w-full h-full bg-[#1a1411]/80 border border-[#d4a373]/25 rounded-[18px] px-4 flex items-center justify-between select-none relative overflow-hidden">
+          <div id="launch-progress-fill" class="absolute left-0 top-0 bottom-0 bg-[#d4a373]/25 w-0 transition-all duration-300 ease-out"></div>
+          <span id="launch-status" class="relative z-10 font-unbounded text-xs font-bold text-white uppercase">ПОДГОТОВКА...</span>
+          <span id="launch-percent" class="relative z-10 font-unbounded text-xs font-black text-[#faedcd]">0%</span>
+        </div>
+      `;
+      
+      const progressFill = document.getElementById('launch-progress-fill');
+      const statusText = document.getElementById('launch-status');
+      const percentText = document.getElementById('launch-percent');
+
+      // Check if Electron context is active
+      if (window.electronAPI) {
+        const maxMemoryVal = localStorage.getItem('settings_ram') || '4096';
+        const mcPathVal = localStorage.getItem('settings_mc_path') || 'C:\\Users\\zsato\\.cozyhouse\\minecraft';
+        const javaPathVal = localStorage.getItem('settings_java_path') || 'java';
+        const versionVal = document.getElementById('settings-client-version')?.value || '26.1.2';
+
+        window.electronAPI.launchGame({
+          username: localStorage.getItem('nickname') || 'Steve',
+          uuid: localStorage.getItem('uuid') || '00000000-0000-0000-0000-000000000000',
+          accessToken: localStorage.getItem('accessToken') || '00000000000000000000000000000000',
+          version: versionVal,
+          maxMemory: `${maxMemoryVal}M`,
+          mcPath: mcPathVal,
+          javaPath: javaPathVal,
+          serverAddress: 'play.he1per.com:25565'
+        });
+      } else {
+        // Fallback Web Browser Mock Simulation
+        let percent = 0;
+        const interval = setInterval(() => {
+          percent += Math.floor(Math.random() * 15) + 5;
+          if (percent >= 100) {
+            percent = 100;
+            clearInterval(interval);
+            
+            if (progressFill) progressFill.style.width = '100%';
+            if (percentText) percentText.textContent = '100%';
+            if (statusText) statusText.textContent = 'ИГРА ЗАПУЩЕНА!';
+            
+            showNotification('Minecraft запущен (Демо-режим).');
+            setTimeout(restorePlayButton, 4000);
+          } else {
+            if (progressFill) progressFill.style.width = `${percent}%`;
+            if (percentText) percentText.textContent = `${percent}%`;
+            if (statusText) {
+              if (percent > 80) statusText.textContent = 'ЗАПУСК MC...';
+              else if (percent > 40) statusText.textContent = 'ХЭШИРОВАНИЕ...';
+              else statusText.textContent = 'ЗАГРУЗКА АССЕТОВ...';
+            }
+          }
+        }, 300);
+      }
+    }
+
+    // Set up Launch Status listener for Electron MCLC
+    if (window.electronAPI) {
+      window.electronAPI.onLaunchStatus((status) => {
+        const progressFill = document.getElementById('launch-progress-fill');
+        const statusText = document.getElementById('launch-status');
+        const percentText = document.getElementById('launch-percent');
+
+        if (status.type === 'progress') {
+          if (status.total && status.pending) {
+            const percent = Math.round(((status.total - status.pending) / status.total) * 100);
+            if (progressFill) progressFill.style.width = `${percent}%`;
+            if (percentText) percentText.textContent = `${percent}%`;
+          }
+          if (statusText) {
+            const taskName = String(status.task || 'БИБЛИОТЕК');
+            const upperTask = taskName.toUpperCase();
+            if (upperTask.startsWith('СКАЧИВАНИЕ') || upperTask.startsWith('DOWNLOAD') || 
+                upperTask.startsWith('РАСПАКОВКА') || upperTask.startsWith('UNPACK') || 
+                upperTask.startsWith('INSTALL')) {
+              statusText.textContent = taskName;
+            } else {
+              statusText.textContent = `СКАЧИВАНИЕ: ${taskName}`;
+            }
+          }
+        } else if (status.type === 'debug') {
+          console.log('[MCLC DEBUG]', status.data);
+          const debugStr = (status.data || '').toLowerCase();
+          if (debugStr.includes("couldn't start minecraft") && 
+             (debugStr.includes("java") || debugStr.includes("command failed") || debugStr.includes("not recognized"))) {
+            hasJavaError = true;
+          }
+          if (statusText) statusText.textContent = 'ЗАПУСК...';
+        } else if (status.type === 'data') {
+          console.log('[MCLC GAME]', status.data);
+          hasLaunched = true;
+          if (statusText) statusText.textContent = 'ИГРА ЗАПУЩЕНА!';
+          if (progressFill) progressFill.style.width = '100%';
+          if (percentText) percentText.textContent = '100%';
+        } else if (status.type === 'close') {
+          console.log('[MCLC CLOSE] code:', status.code);
+          restorePlayButton();
+          if (hasJavaError) {
+            hasJavaError = false;
+            const jModal = document.getElementById('java-error-modal');
+            if (jModal) jModal.classList.remove('hidden');
+          } else if (hasLaunched) {
+            showNotification('Minecraft закрылся (код ' + status.code + ').');
+          }
+        } else if (status.type === 'error') {
+          console.log('[MCLC ERROR]', status.error);
+          restorePlayButton();
+          const errStr = (status.error || '').toLowerCase();
+          const isJavaErr = errStr.includes('java') || 
+                            errStr.includes('javaw') || 
+                            errStr.includes('command-failed') || 
+                            errStr.includes('command failed');
+          if (isJavaErr) {
+            const jModal = document.getElementById('java-error-modal');
+            if (jModal) jModal.classList.remove('hidden');
+          } else {
+            showNotification('Ошибка запуска: ' + (status.error || 'Unknown error'));
+          }
+        }
+      });
+    }
+
+    // Bind initial click handler
+    const initialPlayBtn = document.getElementById('dashboard-play-btn');
+    if (initialPlayBtn) {
+      initialPlayBtn.addEventListener('click', handleLaunch);
+    }
+
+    // 10. Sync button action
+    syncBtn.addEventListener('click', () => {
+      showNotification('Файлы лаунчера проверены и обновлены.');
+    });
+
+    // 11. Add own file trigger dialog mock
+    document.getElementById('add-mods-btn').addEventListener('click', () => {
+      const activeTabBtn = document.querySelector('.subtab-btn.active');
+      const text = activeTabBtn ? activeTabBtn.querySelector('span').textContent : 'файлов';
+      
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.multiple = true;
+      input.onchange = (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+          showNotification(`Импортировано ${files.length} шт. ${text}!`);
+        }
+      };
+      input.click();
+    });
+
+    // ── Skin helpers ───────────────────────────────────────────────────────
+    const AUTH_API = 'https://cozy-house-auth.8pfw45jj9c.workers.dev';
+
+    const loadImg = (src) => new Promise((res, rej) => {
+      const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src;
+    });
+
+    // Extract 8×8 face + hat → 40×40 avatar PNG
+    const extractSkinHead = async (dataUrl) => {
+      const img = await loadImg(dataUrl).catch(() => null);
+      if (!img) return dataUrl;
+      const S = 40, c = document.createElement('canvas');
+      c.width = S; c.height = S;
+      const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, 8, 8, 8, 8, 0, 0, S, S);
+      ctx.drawImage(img, 40, 8, 8, 8, 0, 0, S, S);
+      return c.toDataURL('image/png');
+    };
+
+    // pixel (47,20) is transparent for slim (3px arm), opaque for classic (4px arm)
+    const detectSlim = (img) => {
+      const c = document.createElement('canvas'); c.width = 64; c.height = 64;
+      c.getContext('2d').drawImage(img, 0, 0, 64, 64);
+      return c.getContext('2d').getImageData(47, 20, 1, 1).data[3] < 10;
+    };
+
+    // Render front-facing Minecraft character from raw skin PNG
+    const renderSkinBody = async (skinDataUrl, slimHint) => {
+      const img = await loadImg(skinDataUrl).catch(() => null);
+      if (!img) return skinDataUrl;
+      const slim = slimHint !== undefined ? slimHint : detectSlim(img);
+      const S = 8, AW = slim ? 3 : 4;
+      const W = (AW + 8 + AW) * S, H = (8 + 12 + 12) * S;
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = false;
+      const bx = AW;
+      const p = (sx, sy, sw, sh, dx, dy) =>
+        ctx.drawImage(img, sx, sy, sw, sh, dx * S, dy * S, sw * S, sh * S);
+      p(8,  8,  8,  8,  bx,    0);  // head face
+      p(40, 8,  8,  8,  bx,    0);  // head hat
+      p(20, 20, 8,  12, bx,    8);  // body
+      p(20, 36, 8,  12, bx,    8);  // body overlay
+      p(44, 20, AW, 12, 0,     8);  // right arm
+      p(44, 36, AW, 12, 0,     8);  // right arm overlay
+      p(36, 52, AW, 12, bx+8,  8);  // left arm
+      p(52, 52, AW, 12, bx+8,  8);  // left arm overlay
+      p(4,  20, 4,  12, bx,   20);  // right leg
+      p(4,  36, 4,  12, bx,   20);  // right leg overlay
+      p(20, 52, 4,  12, bx+4, 20);  // left leg
+      p(4,  52, 4,  12, bx+4, 20);  // left leg overlay
+      return c.toDataURL('image/png');
+    };
+
+    // Validate skin dimensions
+    const validateSkin = async (dataUrl) => {
+      const img = await loadImg(dataUrl).catch(() => { throw new Error('Не удалось прочитать файл.'); });
+      if (img.width !== 64 || (img.height !== 64 && img.height !== 32))
+        throw new Error(`Неверный размер: ${img.width}×${img.height}. Нужен 64×64 PNG.`);
+    };
+
+    // Apply skin to all previews (body and head avatars)
+    const applySkin = async (dataUrl, slim) => {
+      if (!dataUrl) return;
+      const bodyUrl = await renderSkinBody(dataUrl, slim);
+      accBigAvatar.src = bodyUrl;
+      if (invCharBody) invCharBody.src = bodyUrl;
+      const headUrl = await extractSkinHead(dataUrl);
+      userDisplayAvatars.forEach(el => el.src = headUrl);
+    };
+
+    // Set one card as active (golden border) and deactivate all others
+    const activateSkinCard = async (card) => {
+      document.querySelectorAll('#saved-skins-grid .saved-skin-card').forEach(c => {
+        c.classList.remove('border-2', 'border-[#d4a373]', 'active-skin');
+        c.classList.add('border', 'border-[#d4a373]/20');
+        c.querySelector('.active-skin-glow')?.remove();
+      });
+      card.classList.remove('border', 'border-[#d4a373]/20');
+      card.classList.add('border-2', 'border-[#d4a373]', 'active-skin');
+      const glow = document.createElement('div');
+      glow.className = 'absolute inset-0 bg-[#d4a373]/5 pointer-events-none active-skin-glow';
+      card.appendChild(glow);
+
+      const skinDataUrl = card.getAttribute('data-skin-url');
+      const skinId      = card.getAttribute('data-skin-id');
+      const slim        = card.getAttribute('data-slim') === 'true';
+
+      if (skinDataUrl) {
+        await applySkin(skinDataUrl, slim);
+        activeSkinLabel.textContent = card.getAttribute('data-skin-name') || 'Скин';
+      } else if (skinId) {
+        accBigAvatar.src = `https://mc-heads.net/body/${skinId}.png`;
+        if (invCharBody) invCharBody.src = `https://mc-heads.net/body/${skinId}.png`;
+        userDisplayAvatars.forEach(el => el.src = `https://mc-heads.net/avatar/${skinId}.png`);
+        activeSkinLabel.textContent = skinId;
+      }
+    };
+
+    // Build a card element for an uploaded PNG skin
+    const buildSkinCard = async (name, skinDataUrl, slim) => {
+      const bodyUrl = await renderSkinBody(skinDataUrl, slim);
+      const card = document.createElement('div');
+      card.className = 'saved-skin-card shrink-0 w-[72px] h-[112px] border border-[#d4a373]/20 hover:border-[#d4a373]/45 bg-[#251d18]/60 rounded-[16px] p-1.5 flex flex-col items-center justify-center cursor-pointer transition-all select-none relative group overflow-hidden';
+      card.setAttribute('data-skin-url', skinDataUrl);
+      card.setAttribute('data-skin-name', name);
+      card.setAttribute('data-slim', slim ? 'true' : 'false');
+      card.innerHTML = `
+        <button class="skin-delete-btn absolute top-1 right-1 w-4 h-4 bg-[#e63946]/90 hover:bg-[#e63946] rounded-full items-center justify-center hidden group-hover:flex z-20">
+          <svg class="w-2 h-2 text-white pointer-events-none" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+        <img class="h-[90px] object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,0.5)] transform group-hover:scale-105 transition-transform pointer-events-none"
+             src="${bodyUrl}" alt="${name}">
+      `;
+      return card;
+    };
+    // ───────────────────────────────────────────────────────────────────────
+
+    document.getElementById('add-skin-card-btn').addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/png';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        showNotification('Загрузка скина...');
+        try {
+          const dataUrl = await new Promise((res, rej) => {
+            const reader = new FileReader();
+            reader.onload = () => res(reader.result); reader.onerror = rej;
+            reader.readAsDataURL(file);
+          });
+          await validateSkin(dataUrl);
+
+          const uuid = localStorage.getItem('uuid');
+          if (!uuid) throw new Error('Войдите в аккаунт.');
+
+          const img = await loadImg(dataUrl);
+          const slim = detectSlim(img);
+
+          const res = await fetch(`${AUTH_API}/api/skin/upload`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uuid, skinUrl: dataUrl })
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || `Ошибка сервера ${res.status}`);
+          }
+
+          const skinName = file.name.replace(/\.png$/i, '');
+          const card = await buildSkinCard(skinName, dataUrl, slim);
+          document.getElementById('add-skin-card-btn').after(card);
+          await activateSkinCard(card);
+
+          localStorage.setItem('cachedSkinUrl', dataUrl);
+          localStorage.setItem('cachedSkinUuid', uuid);
+          localStorage.setItem('cachedSkinSlim', slim ? 'true' : 'false');
+          activeSkinLabel.textContent = skinName;
+          showNotification('Скин успешно загружен!');
+        } catch (err) {
+          showNotification(err.message || 'Ошибка загрузки скина.');
+        }
+      };
+      input.click();
+    });
+
+    // Helper Toast Notification
+    const showNotification = (message) => {
+      const oldNotification = document.getElementById('toast-notif');
+      if (oldNotification) oldNotification.remove();
+
+      const notif = document.createElement('div');
+      notif.id = 'toast-notif';
+      notif.className = 'fixed bottom-6 right-6 px-6 py-4 bg-[#1a1411]/90 border border-[#d4a373]/40 rounded-[18px] shadow-[0_4px_30px_rgba(0,0,0,0.5)] backdrop-blur-md flex items-center space-x-3.5 z-50 text-sm font-semibold text-[#faedcd] select-none animate-[slideIn_0.3s_cubic-bezier(0.16,1,0.3,1)]';
+      notif.innerHTML = `
+        <div class="w-7 h-7 rounded-full bg-[#d4a373]/20 border border-[#d4a373]/40 flex items-center justify-center text-[#d4a373]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <span id="toast-notif-text"></span>
+      `;
+      notif.querySelector('#toast-notif-text').textContent = message;
+      const appWindow = document.getElementById('app-window');
+      if (appWindow) {
+        appWindow.appendChild(notif);
+      } else {
+        document.body.appendChild(notif);
+      }
+
+      setTimeout(() => {
+        notif.classList.add('opacity-0', 'translate-y-2', 'transition-all', 'duration-300');
+        setTimeout(() => notif.remove(), 300);
+      }, 4000);
+    };
+
+    // Auto-Login session check on startup
+    const checkAutoLogin = async () => {
+      const accessToken = localStorage.getItem('accessToken');
+      const clientToken = localStorage.getItem('clientToken');
+      const nickname = localStorage.getItem('nickname');
+      const uuid = localStorage.getItem('uuid');
+
+      if (accessToken && clientToken && nickname) {
+        loginComponent.setLoading(true);
+        try {
+          const res = await fetch('https://cozy-house-auth.8pfw45jj9c.workers.dev/api/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ accessToken, clientToken })
+          });
+
+          if (res.ok) {
+            loginComponent.setLoading(false);
+            loginComponent.dispatchEvent(new CustomEvent('login-success', {
+              detail: { 
+                nickname, 
+                uuid, 
+                accessToken, 
+                clientToken,
+                balance_coins: 0
+              },
+              bubbles: true,
+              composed: true
+            }));
+            return;
+          }
+        } catch (e) {
+          console.error('Auto-login session validation failed:', e);
+        }
+        
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('clientToken');
+        loginComponent.setLoading(false);
+      }
+    };
+
+    // Initialize the lists and inventory items
+    initApp();
+    checkAutoLogin();
+
+    // Electron Integration
+    if (window.electronAPI) {
+      document.body.classList.add('is-electron');
+      // Show custom window controls
+      const electronControls = document.getElementById('electron-controls');
+      if (electronControls) electronControls.classList.remove('hidden');
+
+      // Bind minimize/close buttons
+      document.getElementById('win-min').addEventListener('click', () => {
+        window.electronAPI.minimize();
+      });
+      document.getElementById('win-close').addEventListener('click', () => {
+        window.electronAPI.close();
+      });
+    }
+
+    // ── Live Server Status ──────────────────────────────────────────────────
+    const SERVER_HOST = 'play.he1per.com';
+    const serverDot   = document.getElementById('server-status-dot');
+    const serverCount = document.getElementById('server-online-count');
+    const serverWidget = document.getElementById('server-status-widget');
+
+    const applyServerStatus = (status) => {
+      if (status.online) {
+        serverDot.className = 'relative z-10 w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 transition-colors duration-500 animate-pulse';
+        serverCount.textContent = `${status.players.online}/${status.players.max}`;
+        serverWidget.title = status.motd
+          ? `${status.motd} — нажмите для обновления`
+          : 'Сервер онлайн — нажмите для обновления';
+      } else {
+        serverDot.className = 'relative z-10 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 transition-colors duration-500';
+        serverCount.textContent = 'ОФЛАЙН';
+        serverWidget.title = 'Сервер недоступен — нажмите для обновления';
+      }
+    };
+
+    const fetchServerStatus = async () => {
+      // Show loading state
+      serverDot.className = 'relative z-10 w-1.5 h-1.5 rounded-full bg-[#a99c92] shrink-0 transition-colors duration-500 animate-pulse';
+      serverCount.textContent = '...';
+
+      if (window.electronAPI?.getServerStatus) {
+        const status = await window.electronAPI.getServerStatus(SERVER_HOST);
+        applyServerStatus(status);
+      } else {
+        // Web preview mode — restore placeholder
+        serverDot.className = 'relative z-10 w-1.5 h-1.5 rounded-full bg-[#a99c92] shrink-0 transition-colors duration-500';
+        serverCount.textContent = '—/—';
+      }
+    };
+
+    // Click to refresh manually
+    serverWidget.style.cursor = 'pointer';
+    serverWidget.addEventListener('click', fetchServerStatus);
+
+    // Fetch on dashboard appear (after login) and every 60 seconds
+    loginComponent.addEventListener('login-success', () => {
+      fetchServerStatus();
+    });
+    setInterval(fetchServerStatus, 60000);
+    // ───────────────────────────────────────────────────────────────────────
+
+    // ── Auto-Update Banner ──────────────────────────────────────────────────
+    if (window.electronAPI && window.electronAPI.onUpdateStatus) {
+      const banner          = document.getElementById('update-banner');
+      const bannerIcon      = document.getElementById('update-banner-icon');
+      const bannerTitle     = document.getElementById('update-banner-title');
+      const bannerDesc      = document.getElementById('update-banner-desc');
+      const bannerProgress  = document.getElementById('update-banner-progress-wrap');
+      const bannerBar       = document.getElementById('update-banner-progress-bar');
+      const bannerInstall   = document.getElementById('update-banner-install-btn');
+      const bannerDismiss   = document.getElementById('update-banner-dismiss-btn');
+
+      const isLangRu = () => (savedSettings && savedSettings.lang === 'ru') || document.documentElement.lang === 'ru';
+
+      const slideIn  = () => banner.classList.replace('-translate-y-[140%]', 'translate-y-0');
+      const slideOut = () => banner.classList.replace('translate-y-0', '-translate-y-[140%]');
+
+      bannerDismiss.addEventListener('click', slideOut);
+      bannerInstall.addEventListener('click', () => {
+        if (window.electronAPI.installUpdate) window.electronAPI.installUpdate();
+      });
+
+      const ICONS = {
+        download: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>`,
+        spin:     `<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4 4 4M12 3v13"/></svg>`,
+        check:    `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`
+      };
+
+      window.electronAPI.onUpdateStatus((status) => {
+        const ru = isLangRu();
+
+        if (status.type === 'checking' || status.type === 'not-available' || status.type === 'error') {
+          return; // keep banner hidden for these states
+        }
+
+        if (status.type === 'available') {
+          bannerIcon.innerHTML = ICONS.download;
+          bannerIcon.className = bannerIcon.className.replace('text-emerald-400', 'text-[#d4a373]');
+          bannerTitle.textContent = ru
+            ? `Доступно обновление ${status.version}`
+            : `Update ${status.version} available`;
+          bannerDesc.textContent = ru
+            ? 'Скачивание начнётся автоматически...'
+            : 'Download will start automatically...';
+          bannerProgress.classList.add('hidden');
+          bannerInstall.classList.add('hidden');
+          slideIn();
+        }
+
+        if (status.type === 'downloading') {
+          bannerIcon.innerHTML = ICONS.spin;
+          bannerTitle.textContent = ru
+            ? `Скачивание обновления... ${status.percent}%`
+            : `Downloading update... ${status.percent}%`;
+          bannerDesc.textContent = '';
+          bannerProgress.classList.remove('hidden');
+          bannerBar.style.width = `${status.percent}%`;
+          bannerInstall.classList.add('hidden');
+          slideIn();
+        }
+
+        if (status.type === 'downloaded') {
+          bannerIcon.innerHTML = ICONS.check;
+          bannerIcon.className = bannerIcon.className.replace('text-[#d4a373]', 'text-emerald-400');
+          bannerTitle.textContent = ru
+            ? `Обновление ${status.version} готово!`
+            : `Update ${status.version} ready!`;
+          bannerDesc.textContent = ru
+            ? 'Перезапустите лаунчер для применения.'
+            : 'Restart the launcher to apply.';
+          bannerProgress.classList.add('hidden');
+          bannerBar.style.width = '100%';
+          bannerInstall.classList.remove('hidden');
+          slideIn();
+        }
+      });
+    }
+    // ───────────────────────────────────────────────────────────────────────
+
+    // ── Dynmap (Map Tab) ────────────────────────────────────────────────────
+    const DYNMAP_URL   = 'http://play.he1per.com:8100'; // BlueMap default port
+    const dynmapView   = document.getElementById('dynmap-webview');
+    const mapLock      = document.getElementById('map-lock');
+    const mapLoading   = document.getElementById('map-loading');
+    const mapOpenBtn   = document.getElementById('map-open-browser-btn');
+
+    // When auth API starts returning 'rank', add check here:
+    // const MAP_RANKS = ['vip', 'premium', 'elite', 'admin', 'owner'];
+    const userHasMapAccess = () => !!window._currentUser;
+
+    const initDynmap = () => {
+      if (!userHasMapAccess()) {
+        mapLoading.classList.add('hidden');
+        mapLock.classList.remove('hidden');
+        mapLock.classList.add('flex');
+        return;
+      }
+      // Only load the src once to avoid reloads on every tab switch
+      if (dynmapView.getAttribute('src') === 'about:blank') {
+        dynmapView.setAttribute('src', DYNMAP_URL);
+      }
+      mapLoading.classList.remove('hidden');
+      dynmapView.classList.add('hidden');
+      mapOpenBtn.classList.remove('hidden');
+    };
+
+    if (dynmapView) {
+      dynmapView.addEventListener('did-finish-load', () => {
+        mapLoading.classList.add('hidden');
+        dynmapView.classList.remove('hidden');
+        dynmapView.classList.add('flex');
+      });
+      dynmapView.addEventListener('did-fail-load', () => {
+        mapLoading.innerHTML = '<p class="text-[#a99c92] text-sm text-center px-4">Карта недоступна — убедитесь, что Dynmap запущен на сервере.</p>';
+      });
+    }
+
+    if (mapOpenBtn) {
+      mapOpenBtn.addEventListener('click', () => {
+        if (window.electronAPI?.openExternal) window.electronAPI.openExternal(DYNMAP_URL);
+      });
+    }
+
+    // Trigger map init when the Map tab becomes visible
+    document.querySelectorAll('[data-tab="map"]').forEach(btn => {
+      btn.addEventListener('click', initDynmap);
+    });
+    // ───────────────────────────────────────────────────────────────────────
+
+    // ── Discord News ────────────────────────────────────────────────────────
+    const NEWS_API = 'https://cozy-house-auth.8pfw45jj9c.workers.dev/news';
+
+    const NEWS_PALETTE = {
+      beige:  { from: '#5c3c1e', to: '#2e1d0f', border: '#d4a373', glow: '#d4a373', text: 'text-amber-200/80',    label: 'text-[#d4a373]'   },
+      green:  { from: '#1b3425', to: '#0c1b12', border: '#8cb369', glow: '#8cb369', text: 'text-emerald-300/80',  label: 'text-[#8cb369]'   },
+      blue:   { from: '#1a2b3c', to: '#0c1620', border: '#60a5fa', glow: '#60a5fa', text: 'text-blue-300/80',     label: 'text-blue-400'     },
+      purple: { from: '#2c1b3e', to: '#160c20', border: '#a78bfa', glow: '#a78bfa', text: 'text-purple-300/80',   label: 'text-purple-400'   },
+    };
+
+    const paletteForColor = (hex) => {
+      if (!hex) return NEWS_PALETTE.beige;
+      const r = parseInt(hex.slice(1,3), 16);
+      const g = parseInt(hex.slice(3,5), 16);
+      const b = parseInt(hex.slice(5,7), 16);
+      if (g > r && g > b) return NEWS_PALETTE.green;
+      if (b > r && b > g) return NEWS_PALETTE.blue;
+      if (r > 150 && b > 100 && g < 120) return NEWS_PALETTE.purple;
+      return NEWS_PALETTE.beige;
+    };
+
+    const buildNewsCard = (item) => {
+      const p = paletteForColor(item.color);
+      const card = document.createElement('div');
+      card.className = `shrink-0 w-[240px] p-5 rounded-[20px] bg-gradient-to-br border flex flex-col justify-between h-[120px] hover:-translate-y-1 transition-all duration-300 relative group overflow-hidden cursor-pointer`;
+      card.style.cssText = `background: linear-gradient(to bottom right, ${p.from}, ${p.to}); border-color: ${p.border}33;`;
+
+      const tag = document.createElement('span');
+      tag.className = 'px-2 py-0.5 rounded-[6px] text-[#faedcd] text-[9px] font-bold uppercase tracking-wider';
+      tag.style.background = `${p.border}33`;
+      tag.textContent = item.tag || '#новости';
+
+      const title = document.createElement('h4');
+      title.className = 'text-white font-bold text-sm mt-2 font-unbounded truncate';
+      title.textContent = item.title || '';
+
+      const topDiv = document.createElement('div');
+      topDiv.appendChild(tag);
+      topDiv.appendChild(title);
+
+      const text = document.createElement('span');
+      text.className = `text-xs ${p.text} line-clamp-2`;
+      text.textContent = item.text || '';
+
+      const arrow = document.createElement('span');
+      arrow.className = `text-[9px] font-bold ${p.label} opacity-0 group-hover:opacity-100 transition-opacity ml-2 shrink-0`;
+      arrow.textContent = 'ОТКРЫТЬ →';
+
+      const bottomDiv = document.createElement('div');
+      bottomDiv.className = 'flex justify-between items-end';
+      bottomDiv.appendChild(text);
+      bottomDiv.appendChild(arrow);
+
+      const glow = document.createElement('div');
+      glow.className = 'absolute -right-8 -top-8 w-20 h-20 rounded-full blur-xl transition-all group-hover:opacity-[2]';
+      glow.style.background = `${p.glow}1a`;
+
+      card.appendChild(glow);
+      card.appendChild(topDiv);
+      card.appendChild(bottomDiv);
+
+      if (item.url) {
+        card.addEventListener('click', () => {
+          if (window.electronAPI?.openExternal) window.electronAPI.openExternal(item.url);
+        });
+      }
+      return card;
+    };
+
+    const renderFallbackNews = () => {
+      const container = document.getElementById('news-cards-container');
+      if (!container) return;
+      const fallback = [
+        { tag: '#инфо',  title: 'Cozy House',        text: 'Уютный сервер выживания!',    color: null  },
+        { tag: '#сервер', title: 'he1per.com',         text: 'play.he1per.com · MC 26.1.2', color: '#22c55e' },
+        { tag: '#новости', title: 'Скоро...',           text: 'Новости появятся после настройки Discord-бота.', color: '#60a5fa' }
+      ];
+      container.innerHTML = '';
+      fallback.forEach(item => container.appendChild(buildNewsCard(item)));
+    };
+
+    const fetchNews = async () => {
+      const container = document.getElementById('news-cards-container');
+      if (!container) return;
+      try {
+        const res = await fetch(NEWS_API, { signal: AbortSignal.timeout(8000) });
+        if (!res.ok) throw new Error('bad response');
+        const items = await res.json();
+        if (!Array.isArray(items) || items.length === 0) { renderFallbackNews(); return; }
+        container.innerHTML = '';
+        items.slice(0, 5).forEach(item => container.appendChild(buildNewsCard(item)));
+      } catch {
+        renderFallbackNews();
+      }
+    };
+
+    // Fetch news after login and immediately on load
+    loginComponent.addEventListener('login-success', fetchNews);
+    fetchNews();
+    // ───────────────────────────────────────────────────────────────────────
+  </script>
+
+  <!-- Java Check Modal -->
+  <div id="java-error-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/60 backdrop-blur-sm transition-all duration-300">
+    <div class="bg-[#1e1714] border border-[#d4a373]/30 rounded-[28px] max-w-md w-full p-8 shadow-[0_10px_50px_rgba(0,0,0,0.8)] relative mx-4 text-center">
+      <div class="w-16 h-16 bg-[#d4a373]/15 rounded-full flex items-center justify-center mx-auto mb-5 border border-[#d4a373]/30">
+        <svg class="w-8 h-8 text-[#d4a373]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <h4 class="font-unbounded font-black text-xl text-white mb-3">Не найдена Java 21!</h4>
+      <p class="text-xs text-[#a99c92] leading-relaxed mb-6">
+        Minecraft 26.1.2 требует Java версии 21 или выше. Вы можете скачать официальный и безопасный установщик Java 21 (Adoptium Temurin) прямо сейчас.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button id="close-java-modal-btn" class="px-5 py-3 border border-[#31251e] hover:bg-[#251d18] text-[#a99c92] rounded-[14px] text-xs font-bold transition-all cursor-pointer">
+          Отмена
+        </button>
+        <button id="download-java-modal-btn" class="px-5 py-3 bg-[#d4a373] hover:bg-[#c69362] text-white rounded-[14px] text-xs font-bold transition-all shadow-md shadow-[#d4a373]/25 cursor-pointer">
+          Скачать Java 21
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Bind Java error modal close/download button handlers
+    const javaModal = document.getElementById('java-error-modal');
+    const closeJavaBtn = document.getElementById('close-java-modal-btn');
+    const downloadJavaBtn = document.getElementById('download-java-modal-btn');
+
+    if (closeJavaBtn && javaModal) {
+      closeJavaBtn.addEventListener('click', () => {
+        javaModal.classList.add('hidden');
+      });
+    }
+
+    if (downloadJavaBtn && javaModal) {
+      downloadJavaBtn.addEventListener('click', () => {
+        javaModal.classList.add('hidden');
+        if (window.electronAPI && window.electronAPI.openExternal) {
+          window.electronAPI.openExternal('https://adoptium.net/temurin/releases/?version=21');
+          const isRu = !document.documentElement.lang || document.documentElement.lang === 'ru';
+          showNotification(isRu ? 'Ссылка на скачивание открыта в вашем браузере.' : 'Download link opened in your browser.');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

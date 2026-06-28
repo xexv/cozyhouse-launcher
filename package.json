@@ -1,0 +1,62 @@
+{
+  "name": "cozyhouse-launcher",
+  "version": "0.0.1-alpha",
+  "description": "Cozy House Minecraft Launcher client wrapped in Electron",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "release": "electron-builder --publish always"
+  },
+  "keywords": [
+    "minecraft",
+    "launcher",
+    "electron"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "minecraft-launcher-core": "^3.18.2"
+  },
+  "build": {
+    "appId": "ru.cozyhouse.launcher",
+    "productName": "Cozy House Launcher",
+    "directories": {
+      "output": "dist"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "xexv",
+      "repo": "cozyhouse-launcher"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "cozyhouseinstaller.${ext}",
+      "sign": null,
+      "signingHashAlgorithms": null
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Cozy House Launcher"
+    },
+    "files": [
+      "**/*",
+      "!dist/**/*",
+      "!server/**/*",
+      "!.git/**/*",
+      "!.gemini/**/*",
+      "!package-lock.json"
+    ]
+  }
+}
