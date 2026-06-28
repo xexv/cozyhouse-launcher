@@ -2093,7 +2093,7 @@
       document.getElementById('dashboard-play-btn').addEventListener('click', handleLaunch);
     };
 
-    function handleLaunch() {
+    async function handleLaunch() {
       if (isLaunching) return;
       isLaunching = true;
       hasLaunched = false;
