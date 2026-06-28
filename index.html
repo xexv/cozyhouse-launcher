@@ -1188,6 +1188,7 @@
       'from-purple-500 to-fuchsia-600', 'from-teal-500 to-emerald-600',
     ];
     const MODPACK_MANIFEST = 'https://cozy-house-auth.8pfw45jj9c.workers.dev/api/modpack';
+    const AUTH_API         = 'https://cozy-house-auth.8pfw45jj9c.workers.dev';
 
     // Extract human-readable name from jar/zip filename
     const modNameFromFilename = (filename) => {
@@ -1432,6 +1433,7 @@
       localStorage.removeItem('clientToken');
       localStorage.removeItem('cachedSkinUrl');
       localStorage.removeItem('cachedSkinUuid');
+      localStorage.removeItem('cachedSkinSlim');
 
       dashboardPage.classList.remove('opacity-100', 'scale-100');
       dashboardPage.classList.add('opacity-0', 'scale-95');
@@ -1439,7 +1441,7 @@
       // Call background logout endpoint to revoke session in DB
       if (accessToken) {
         try {
-          fetch('https://cozy-house-auth.8pfw45jj9c.workers.dev/api/logout', {
+          fetch(`${AUTH_API}/api/logout`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ accessToken })
@@ -2263,8 +2265,6 @@
     });
 
     // ── Skin helpers ───────────────────────────────────────────────────────
-    const AUTH_API = 'https://cozy-house-auth.8pfw45jj9c.workers.dev';
-
     const loadImg = (src) => new Promise((res, rej) => {
       const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src;
     });
@@ -2469,7 +2469,7 @@
       if (accessToken && clientToken && nickname) {
         loginComponent.setLoading(true);
         try {
-          const res = await fetch('https://cozy-house-auth.8pfw45jj9c.workers.dev/api/validate', {
+          const res = await fetch(`${AUTH_API}/api/validate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ accessToken, clientToken })
@@ -2478,16 +2478,19 @@
           if (res.ok) {
             loginComponent.setLoading(false);
             loginComponent.dispatchEvent(new CustomEvent('login-success', {
-              detail: { 
-                nickname, 
-                uuid, 
-                accessToken, 
+              detail: {
+                nickname,
+                uuid,
+                accessToken,
                 clientToken,
-                balance_coins: 0
+                balance_coins: 0,
+                skin_url: localStorage.getItem('cachedSkinUrl') || null
               },
               bubbles: true,
               composed: true
             }));
+            // Fetch fresh balance, skin and rank from server after transition
+            setTimeout(() => refreshProfile(), 600);
             return;
           }
         } catch (e) {

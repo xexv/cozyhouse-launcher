@@ -324,13 +324,14 @@ class CozyLogin extends HTMLElement {
 
       // Dispatch event to index.html with login response
       this.dispatchEvent(new CustomEvent('login-success', {
-        detail: { 
+        detail: {
           nickname: loginData.username,
           uuid: loginData.uuid,
           accessToken: loginData.accessToken,
           clientToken: loginData.clientToken,
           balance_coins: loginData.balance_coins,
-          skin_url: loginData.skin_url
+          skin_url: loginData.skin_url,
+          rank: loginData.rank
         },
         bubbles: true,
         composed: true

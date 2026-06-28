@@ -107,6 +107,7 @@ export default {
           clientToken,
           balance_coins: user.balance_coins,
           skin_url: user.skin_url,
+          rank: user.role ?? 'user',
         });
       }
 
@@ -163,21 +164,28 @@ export default {
           return jsonResponse({ error: "News not configured" }, 503);
         }
 
-        const discordRes = await fetch(
-          `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages?limit=5`,
-          {
-            headers: {
-              "Authorization": `Bot ${BOT_TOKEN}`,
-              "User-Agent": "CozyHouseLauncher/1.0",
-            },
+        let messages;
+        try {
+          const discordRes = await fetch(
+            `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages?limit=5`,
+            {
+              headers: {
+                "Authorization": `Bot ${BOT_TOKEN}`,
+                "User-Agent": "CozyHouseLauncher/1.0",
+              },
+              cf: { cacheTtl: 120, cacheEverything: false },
+            }
+          );
+          if (!discordRes.ok) {
+            const errText = await discordRes.text();
+            console.error("[news] Discord API error:", discordRes.status, errText);
+            return jsonResponse({ error: "Discord error" }, 502);
           }
-        );
-
-        if (!discordRes.ok) {
-          return jsonResponse({ error: "Discord error" }, 502);
+          messages = await discordRes.json();
+        } catch (e) {
+          console.error("[news] fetch failed:", e);
+          return jsonResponse({ error: "Failed to fetch news" }, 500);
         }
-
-        const messages = await discordRes.json();
 
         const news = messages
           .filter((m) => m.content || m.embeds?.length > 0)
@@ -189,7 +197,7 @@ export default {
             return {
               tag:       embed?.footer?.text || "#новости",
               title:     embed?.title        || m.author?.username || "Новость",
-              text:      embed?.description  || (m.content || "").slice(0, 120),
+              text:      embed?.description  || m.content?.slice(0, 120) || "",
               color:     hexColor,
               url:       embed?.url          || null,
               timestamp: m.timestamp,
@@ -236,7 +244,7 @@ export default {
         });
       }
 
-      // Route 10: Player lookup — proxies Mojang API (avoids browser CORS)
+      // Route 9: Player lookup — proxies Mojang API (avoids browser CORS)
       if (url.pathname.startsWith("/api/player/") && request.method === "GET") {
         const username = decodeURIComponent(url.pathname.slice("/api/player/".length)).trim();
         if (!username) return errorResponse("Никнейм обязателен.", 400);

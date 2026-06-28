@@ -223,8 +223,10 @@ const downloadFile = (url, dest, progressCallback, _redirectDepth = 0) => {
 const extractZip = (zipPath, destDir) => {
   return new Promise((resolve, reject) => {
     fs.mkdirSync(destDir, { recursive: true });
-    // Run PowerShell command to extract the JRE safely without dependencies
-    const cmd = `powershell.exe -Command "Expand-Archive -Path '${zipPath}' -DestinationPath '${destDir}' -Force"`;
+    // Escape single-quotes so paths with apostrophes don't break PowerShell
+    const safeZip  = zipPath.replace(/'/g, "''");
+    const safeDest = destDir.replace(/'/g, "''");
+    const cmd = `powershell.exe -Command "Expand-Archive -Path '${safeZip}' -DestinationPath '${safeDest}' -Force"`;
     exec(cmd, (error, stdout, stderr) => {
       if (error) {
         reject(error);
